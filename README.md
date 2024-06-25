@@ -58,10 +58,5 @@ Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF
 
 ### Examples
 
-See examples here: 
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey40") +
-  xlab("True MAF") + ylab("Estimated MAF") +
-  theme_bw() +
-  facet_wrap(~status)
-```
-<img src="man/figures/CaseControl_SE_example.png" height=70% width=70%>
+See examples here: (https://wolffha.github.io/CaseControlAF/)
+
