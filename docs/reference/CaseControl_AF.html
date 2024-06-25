@@ -96,21 +96,24 @@ equal to the number of variants</p>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set 'sampleDat' not found</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">79148</span></span></span>
-<span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">61106</span></span></span>
+<span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span></span>
+<span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get the estimated case and control AFs</span></span></span>
 <span class="r-in"><span><span class="va">af_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_AF</span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
 <span class="r-in"><span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span></span>
 <span class="r-in"><span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span></span>
 <span class="r-in"><span>                                    AF_population <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_pop</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: genpwr</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'sampleDat' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'af_method_results' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        AF_case   AF_control</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2.041813e-01 2.041254e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 4.468049e-01 4.471490e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.647775e-01 1.641968e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.000000e+00 0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.077692e-05 3.776488e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 1.381395e-02 1.402353e-02</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -30,8 +30,8 @@ Make sure the vectors are in the same order for your variants
 \examples{
 data("sampleDat")
 
-nCase_sample = 79148
-nControl_sample = 61106
+nCase_sample = 16550
+nControl_sample = 403923
 
 # get the estimated case and control AFs
 af_method_results <- CaseControl_AF(N_case = nCase_sample,

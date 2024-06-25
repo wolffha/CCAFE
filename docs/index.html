@@ -108,44 +108,44 @@
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load the data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"SampleDat"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span>
 <span><span class="co"># this sample data contains 148 variants from a prostate cancer GWAS with the below sample sizes</span></span>
 <span></span>
-<span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">79148</span></span>
-<span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">61106</span></span>
+<span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span>
+<span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SampleDat</span><span class="op">)</span></span>
-<span><span class="co">#  rsid case_af control_af case_maf control_maf     SE   OR</span></span>
-<span><span class="co">#1    1  0.6917     0.6825   0.3083      0.3175 0.0086 1.18</span></span>
-<span><span class="co">#2    2  0.2295     0.2181   0.2295      0.2181 0.0096 1.07</span></span>
-<span><span class="co">#3    3  0.4580     0.4467   0.4580      0.4467 0.0080 1.05</span></span>
-<span><span class="co">#4    4  0.7554     0.7379   0.2446      0.2621 0.0091 1.10</span></span>
-<span><span class="co">#5    5  0.3675     0.3575   0.3675      0.3575 0.0083 1.06</span></span>
-<span><span class="co">#6    6  0.7141     0.6995   0.2859      0.3005 0.0087 1.07</span></span>
-<span></span>
-<span><span class="co"># calculate whole sample true AF</span></span>
-<span><span class="va">SampleDat</span><span class="op">$</span><span class="va">true_AF</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">SampleDat</span><span class="op">$</span><span class="va">case_af</span> <span class="op">*</span> <span class="va">nCase_sample</span> <span class="op">+</span> <span class="va">SampleDat</span><span class="op">$</span><span class="va">control_af</span> <span class="op">*</span> <span class="va">nControl_sample</span><span class="op">)</span><span class="op">/</span><span class="op">(</span><span class="va">nCase_sample</span> <span class="op">+</span> <span class="va">nControl_sample</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span></span>
+<span><span class="co"># A tibble: 6 × 11</span></span>
+<span><span class="co"># Rowwise: </span></span>
+<span><span class="co">#  CHR         POS REF   ALT   true_maf_case true_maf_control      beta     SE gnomad_maf    OR true_maf_pop</span></span>
+<span><span class="co">#  &lt;chr&gt;     &lt;int&gt; &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span><span class="co">#1 chr1  226824710 C     T         0.205            0.204      0.000344 0.0147  0.204     1.00     0.204    </span></span>
+<span><span class="co">#2 chr1  117812346 G     A         0.448            0.447     -0.00139  0.0120  0.446     0.999    0.447    </span></span>
+<span><span class="co">#3 chr1  230838863 C     T         0.165            0.164      0.00422  0.0162  0.183     1.00     0.164    </span></span>
+<span><span class="co">#4 chr1   93121792 ATT   A         0                0         -0.106    3.53    0.000108  0.900    0        </span></span>
+<span><span class="co">#5 chr1  240236388 G     A         0.0000111        0.0000378 -1.25     1.25    0.0000882 0.285    0.0000367</span></span>
+<span><span class="co">#6 chr1   12385196 G     A         0.0139           0.0140    -0.0153   0.0505  0.0116    0.985    0.0140 </span></span>
 <span></span>
 <span><span class="va">af_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_AF.html">CaseControl_AF</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
 <span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
-<span>                                    OR <span class="op">=</span> <span class="va">SampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
-<span>                                    AF_population <span class="op">=</span> <span class="va">SampleDat</span><span class="op">$</span><span class="va">true_AF</span><span class="op">)</span></span>
+<span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
+<span>                                    AF_population <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_pop</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span></span>
-<span><span class="co">#  AF_case AF_control</span></span>
-<span><span class="co">#1  0.6917     0.6825</span></span>
-<span><span class="co">#2  0.2295     0.2181</span></span>
-<span><span class="co">#3  0.4580     0.4467</span></span>
-<span><span class="co">#4  0.7554     0.7379</span></span>
-<span><span class="co">#5  0.3675     0.3575</span></span>
-<span><span class="co">#6  0.7141     0.6995</span></span>
+<span><span class="co">#       AF_case   AF_control</span></span>
+<span><span class="co">#1 2.041813e-01 2.041254e-01</span></span>
+<span><span class="co">#2 4.468049e-01 4.471490e-01</span></span>
+<span><span class="co">#3 1.647775e-01 1.641968e-01</span></span>
+<span><span class="co">#4 0.000000e+00 0.000000e+00</span></span>
+<span><span class="co">#5 1.077692e-05 3.776488e-05</span></span>
+<span><span class="co">#6 1.381395e-02 1.402353e-02</span></span>
 <span></span>
 <span><span class="co"># visualise the bias in the results compared to the published true AFs</span></span>
 <span><span class="va">plotdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>estimated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">$</span><span class="va">AF_case</span>, <span class="va">af_method_results</span><span class="op">$</span><span class="va">AF_control</span><span class="op">)</span>,</span>
-<span>                       true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">$</span><span class="va">Case_Affected_Frequency</span>, </span>
-<span>                                <span class="va">af_method_results</span><span class="op">$</span><span class="va">Control_Affected_Frequency</span><span class="op">)</span>,</span>
+<span>                       true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>, </span>
+<span>                                <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span><span class="op">)</span>,</span>
 <span>                       status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span><span class="op">)</span>, </span>
 <span>                       <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Control"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># smaple PC plot for package</span></span>
+<span><span class="co"># plot the results</span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plotdata</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true</span>, y <span class="op">=</span> <span class="va">estimated</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -156,31 +156,89 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
 <span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
-<span>                                    OR <span class="op">=</span> <span class="va">SampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
-<span>                                    SE <span class="op">=</span> <span class="va">SampleDat</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span></span>
+<span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
+<span>                                    SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span></span>
-<span><span class="co">#  MAF_case    MAF_control MAF_pop</span></span>
-<span><span class="co">#1 0.2721196   0.2637265   0.2684629</span></span>
-<span><span class="co">#2 0.2013120   0.1909652   0.1968041</span></span>
-<span><span class="co">#3 0.3521112   0.3417763   0.3476085</span></span>
-<span><span class="co">#4 0.2354858   0.2192349   0.2284056</span></span>
-<span><span class="co">#5 0.3058994   0.2967891   0.3019302</span></span>
-<span><span class="co">#6 0.2657115   0.2521924   0.2598215</span></span>
+<span><span class="co">#      MAF_case  MAF_control      MAF_pop</span></span>
+<span><span class="co">#1 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
+<span><span class="co">#2 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
+<span><span class="co">#3 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
+<span><span class="co">#4 2.513875e-06 2.794421e-06 2.783379e-06</span></span>
+<span><span class="co">#5 1.946826e-05 6.821993e-05 6.630105e-05</span></span>
+<span><span class="co">#6 1.250050e-02 1.269041e-02 1.268294e-02</span></span>
 <span></span>
 <span><span class="co"># visualize the bias in results compared to the published minor allele frequency (MAF)</span></span>
 <span><span class="va">plotdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>estimated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_case</span>, <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_control</span><span class="op">)</span>,</span>
-<span>                       true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">$</span><span class="va">case_maf</span>,<span class="va">se_method_results</span><span class="op">$</span><span class="va">control_maf</span><span class="op">)</span>,</span>
+<span>                       true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>,<span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span><span class="op">)</span>,</span>
 <span>                       status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span><span class="op">)</span>, </span>
 <span>                       <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Control"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># smaple PC plot for package</span></span>
+<span><span class="co"># plot the results</span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plotdata</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true</span>, y <span class="op">=</span> <span class="va">estimated</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"True MAF"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"Estimated MAF"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">coord_cartesian</span><span class="op">(</span>xlim<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.5</span><span class="op">)</span>, ylim<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">status</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/CaseControl_SE_example.png" height="70%" width="70%"></p>
+<p>Here we observe distinct bias, which increases as the MAF increases. We will then use the correction framework described in our paper and implemented here to use gnomAD as a proxy for the true MAF_pop.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
+<span>                                     N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
+<span>                                     OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
+<span>                                     SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span>, </span>
+<span>                                     proxyMAFs <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">gnomad_maf</span><span class="op">)</span></span>
+<span>                                     </span>
+<span><span class="va">plotdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>true_maf_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>, <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>,</span>
+<span>                                        <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span>, <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span><span class="op">)</span>,</span>
+<span>                       maf_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_case</span>,</span>
+<span>                                   <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_case_adj</span>,</span>
+<span>                                   <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_control</span>,</span>
+<span>                                   <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_control_adj</span><span class="op">)</span>,</span>
+<span>                       pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Control"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Control"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                       type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Uncorrected"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                                <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Corrected"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                                <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Uncorrected"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                                <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Corrected"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>                                     </span>
+<span><span class="va">ccc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Corrected"</span>, <span class="st">"Corrected"</span>, <span class="st">"Uncorrected"</span>, <span class="st">"Uncorrected"</span><span class="op">)</span>,</span>
+<span>                  pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="st">"Control"</span>, <span class="st">"Case"</span>, <span class="st">"Control"</span><span class="op">)</span>,</span>
+<span>                  ccc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">CCC</span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>,</span>
+<span>                              <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_case_adj</span><span class="op">)</span><span class="op">$</span><span class="va">rho.c</span><span class="op">$</span><span class="va">est</span>,</span>
+<span>                          <span class="fu">CCC</span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span>,</span>
+<span>                              <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_control_adj</span><span class="op">)</span><span class="op">$</span><span class="va">rho.c</span><span class="op">$</span><span class="va">est</span>,</span>
+<span>                          <span class="fu">CCC</span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>,</span>
+<span>                              <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_case</span><span class="op">)</span><span class="op">$</span><span class="va">rho.c</span><span class="op">$</span><span class="va">est</span>,</span>
+<span>                          <span class="fu">CCC</span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span>,</span>
+<span>                              <span class="va">se_method_results</span><span class="op">$</span><span class="va">MAF_control</span><span class="op">)</span><span class="op">$</span><span class="va">rho.c</span><span class="op">$</span><span class="va">est</span><span class="op">)</span>,</span>
+<span>                  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.07</span>, <span class="fl">0.07</span>, <span class="fl">0.07</span>, <span class="fl">0.07</span><span class="op">)</span>,</span>
+<span>                  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="fl">0.46</span>, <span class="fl">0.46</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ccc</span><span class="op">$</span><span class="va">ccc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ccc</span><span class="op">$</span><span class="va">ccc</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">ccc</span><span class="op">$</span><span class="va">label</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"CCC = "</span>, <span class="va">ccc</span><span class="op">$</span><span class="va">ccc</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plotdata</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">true_maf_pop</span> <span class="op">&gt;</span> <span class="fl">0.01</span><span class="op">)</span>, </span>
+<span>                 <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true_maf_pop</span>, y <span class="op">=</span> <span class="va">maf_pop</span>, color <span class="op">=</span> <span class="va">type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ccc</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, label <span class="op">=</span> <span class="va">label</span>, colour <span class="op">=</span> <span class="va">type</span><span class="op">)</span>, show.legend <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">coord_cartesian</span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey40"</span>, <span class="st">"black"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"darkred"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Estimated vs True With gnomAD Adjustment"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"True MAF (Y)"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"Estimated MAF (Y')"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">pop</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>        plot.title <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">16</span><span class="op">)</span>,</span>
+<span>        axis.title <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>,</span>
+<span>        axis.text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>,</span>
+<span>        strip.text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>,</span>
+<span>        legend.text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>                                     </span></code></pre></div>
+<p><img src="reference/figures/CaseControl_SE_withCorr.png" height="70%" width="70%"></p>
 </div>
 </div>
   </div>

@@ -50,7 +50,7 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_SE</span><span class="op">(</span><span class="va">N_case</span>, <span class="va">N_control</span>, <span class="va">OR</span>, <span class="va">SE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_SE</span><span class="op">(</span><span class="va">N_case</span>, <span class="va">N_control</span>, <span class="va">OR</span>, <span class="va">SE</span>, proxyMAFs <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,12 +70,16 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
 <dt>SE</dt>
 <dd><p>a vector of standard errors for the OR calculation *make sure the indices match between the two vectors</p></dd>
 
+
+<dt>proxyMAFs</dt>
+<dd><p>a vector of minor allele frequencies (MAFs) for the true whole sample MAF to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant</p>
+<p>a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_pop_adj) with the adjusted estimates.</p>
     </div>
     <div id="note">
     <h2>Note</h2>
@@ -97,20 +101,24 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set 'sampleDat' not found</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">79148</span></span></span>
-<span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">61106</span></span></span>
+<span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span></span>
+<span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get the estimated case and control MAFs</span></span></span>
 <span class="r-in"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_SE</span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
 <span class="r-in"><span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span></span>
 <span class="r-in"><span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span></span>
 <span class="r-in"><span>                                    SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'sampleDat' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'se_method_results' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       MAF_case  MAF_control      MAF_pop</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1.764905e-01 1.764405e-01 1.764425e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3.263835e-01 3.266896e-01 3.266776e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.392353e-01 1.387297e-01 1.387496e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 2.513875e-06 2.794421e-06 2.783379e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.946826e-05 6.821993e-05 6.630105e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 1.250050e-02 1.269041e-02 1.268294e-02</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

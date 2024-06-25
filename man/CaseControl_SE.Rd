@@ -4,7 +4,7 @@
 \alias{CaseControl_SE}
 \title{CaseControl_SE}
 \usage{
-CaseControl_SE(N_case, N_control, OR, SE)
+CaseControl_SE(N_case, N_control, OR, SE, proxyMAFs = NA)
 }
 \arguments{
 \item{N_case}{an integer of the number of Case individuals}
@@ -14,9 +14,11 @@ CaseControl_SE(N_case, N_control, OR, SE)
 \item{OR}{a vector of odds ratios}
 
 \item{SE}{a vector of standard errors for the OR calculation *make sure the indices match between the two vectors}
+
+\item{proxyMAFs}{a vector of minor allele frequencies (MAFs) for the true whole sample MAF to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA}
 }
 \value{
-a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant
+a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_pop_adj) with the adjusted estimates.
 }
 \description{
 This is a function to derive the case and control AFs from GWAS summary statistics when
@@ -30,8 +32,8 @@ Make sure the vectors are in the same order for your variants
 \examples{
 data("sampleDat")
 
-nCase_sample = 79148
-nControl_sample = 61106
+nCase_sample = 16550
+nControl_sample = 403923
 
 # get the estimated case and control MAFs
 se_method_results <- CaseControl_SE(N_case = nCase_sample,
