@@ -55,6 +55,12 @@ CaseControl_AF <- function(N_case, N_control, OR, AF_population){
   if(N_control <= 0) {
     stop("ERROR: 'N_control' needs to be a number > 0")
   }
+  if(any(AF_population < 0)) {
+    stop("ERROR: 'AF_population' vector cannot contain negative AFs")
+  }
+  if(any(AF_population > 1)) {
+    stop("ERROR: 'AF_population' vector cannot contain values > 1")
+  }
 
   # uses the genpwr package for the quad_roots function to solve for the roots of quadratic
   #require(genpwr)

@@ -63,6 +63,9 @@ CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
       stop("ERROR: 'proxyMAFs' needs to be the same length as the vector of ORs. If you don't have proxy true MAFs then set proxyMAFs = NA")
     }
   }
+  if(any(SE < 0)) {
+    stop("ERROR: 'SE' vector cannot contain negative values")
+  }
 
   # this function uses w, x, y, z as the derivation in the ReACt paper does - see their supplement
   w = SE^2
@@ -192,11 +195,21 @@ CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
       return(adjusted)
     }
     bias = get_adjusted(estimated = MAF_pop, true = proxyMAFs)
+
+    MAF_case_adj = MAF_case + bias
+    MAF_control_adj = MAF_control + bias
+    MAF_pop_adj = MAF_pop + bias
+
+    # round any negatives to 0
+    MAF_case_adj[MAF_case_adj < 0] = 0
+    MAF_control_adj[MAF_control_adj < 0] = 0
+    MAF_pop_adj[MAF_pop_adj < 0] = 0
+
     return(data.frame(MAF_case = MAF_case,
                       MAF_control = MAF_control,
                       MAF_pop = MAF_pop,
-                      MAF_case_adj = MAF_case + bias,
-                      MAF_control_adj = MAF_control + bias,
-                      MAF_pop_adj = MAF_pop + bias))
+                      MAF_case_adj = MAF_case_adj,
+                      MAF_control_adj = MAF_control_adj,
+                      MAF_pop_adj = MAF_pop_adj))
   }
 }
