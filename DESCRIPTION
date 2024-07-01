@@ -3,7 +3,7 @@ Type: Package
 Title: Case Control Allele Frequency Reconstruction 
 Version: 0.1.0
 Author: Hayley Wolff (Stoneman)
-Maintainer: The package maintainer <yourself@somewhere.net>
+Maintainer: Hayley Wolff <hayley.wolff@cuanschutz.edu>
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
     The second function uses OR, NCase, NControl, and AF for the whole sample. 
