@@ -1,0 +1,7 @@
+CHANGES IN VERSION 0.99.0
+-------------------------
+
+First devel version of the package. Contains 2 functions:
+
+* CaseControl_AF
+* CaseControl_SE
