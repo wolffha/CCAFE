@@ -1,0 +1,511 @@
+---
+title: "CaseControl_SE Correction Final"
+output: html_notebook
+---
+
+### This is the final version of the CaseControl_SE correction using gnomAD proxy MAFs 
+
+Model the relationship between gnomAD MAF (X) and the estimated MAF ($\hat{Y}$)
+
+Then take the goal value (gnomAD MAF) - predicted MAF = Bias
+
+Then estimated MAF + bias = adjusted
+
+$$ Predicted = \beta_0 + \beta_1*MAF_{gnomAD} + \beta_2*MAF_{gnomAD}^2 $$
+$$ Bias = MAF_{gnomAD} - (\beta_0 + \beta_1*MAF_{gnomAD} + \beta_2*MAF_{gnomAD}^2) $$
+
+$$ MAF_{adjusted} = MAF_{estimated} + Bias = MAF_{estimated} + (MAF_{gnomAD} - (\beta_0 + \beta_1*MAF_{gnomAD} + \beta_2*MAF_{gnomAD}^2))$$
+
+*Fit for each MAF bin*
+
+```{r, setup}
+knitr::opts_knit$set(root.dir = "C:/Users/HayBa/Documents/Graduate School/GeneticPredisposition/CCPM_prostate/")
+l = "C:/Users/HayBa/Documents/R/myLibs/"
+library(tidyverse, lib = l)
+library(CaseControlAF, lib = l)
+```
+
+```{r}
+gnomad <- read.csv("gnomad_ukb_diab_merged_chr1.csv")
+gnomad <- gnomad %>% filter(!is.na(se_AFR) & !is.na(se_EUR))
+gnomad <- gnomad %>% filter(alt == REF | alt == ALT)
+# Keep only SNPs that have at least one match between alt/ref alleles - down to 14,212,618
+
+# flip alleles so alleles in gnomAD match the reported ones in PanUK Biobank
+gnomad <- gnomad %>% rowwise() %>%
+  mutate(flipped = ifelse(alt == REF, 1, 0)) %>%
+  mutate(match_ALT = ifelse(flipped == 1, REF, ALT),
+         match_AFnfe = ifelse(flipped == 1, 1-AFnfe, AFnfe),
+         match_AFafr = ifelse(flipped == 1, 1-AFafr, AFafr))
+
+# get the maf for diabetes cases in pan-uk biobank and gnomAD NFE and AFR/AFRAM
+gnomad <- gnomad %>% rowwise() %>%
+  mutate(maf_cases_EUR = ifelse(af_cases_EUR > 0.5, 1 - af_cases_EUR, af_cases_EUR),
+         maf_cases_AFR = ifelse(af_cases_AFR > 0.5, 1 - af_cases_AFR, af_cases_AFR),
+         maf_gnomad_EUR = ifelse(match_AFnfe > 0.5, 1 - match_AFnfe, match_AFnfe),
+         maf_gnomad_AFR = ifelse(match_AFafr > 0.5, 1 - match_AFafr, match_AFafr))
+```
+
+gnomAD chr1 dataset has 1,212,618 variants
+```{r}
+colnames(gnomad)
+```
+
+```{r}
+nCase_diab = 16550
+nControl_diab = 403923
+
+res_EUR <- CaseControl_SE(OR = exp(gnomad$beta_EUR),
+                          SE = gnomad$se_EUR,
+                          N_case = nCase_diab,
+                          N_control = nControl_diab)
+res_AFR <- CaseControl_SE(OR = exp(gnomad$beta_AFR),
+                          SE = gnomad$se_AFR,
+                          N_case = 668,
+                          N_control = 5956)
+```
+
+```{r}
+gnomad <- gnomad %>% rowwise() %>%
+  mutate(maf_controls_EUR = ifelse(af_controls_EUR > 0.5, 1 - af_controls_EUR, af_controls_EUR),
+         maf_controls_AFR = ifelse(af_controls_AFR > 0.5, 1 - af_controls_AFR, af_controls_AFR))
+         
+gnomad$est_MAF_case_EUR <- res_EUR$MAF_case
+gnomad$est_MAF_control_EUR <- res_EUR$MAF_control
+gnomad$est_MAF_pop_EUR <- res_EUR$MAF_pop
+gnomad$est_MAF_case_AFR <- res_AFR$MAF_case
+gnomad$est_MAF_control_AFR <- res_AFR$MAF_control
+gnomad$est_MAF_pop_AFR <- res_AFR$MAF_pop
+
+gnomad$maf_pop_EUR <- (gnomad$maf_cases_EUR*nCase_diab + gnomad$maf_controls_EUR*nControl_diab)/
+  (nCase_diab + nControl_diab)
+gnomad$maf_pop_AFR <- (gnomad$maf_cases_AFR*668 + gnomad$maf_controls_AFR*5956)/
+  (668+5956)
+```
+
+```{r}
+get_adjusted <- function(bins = "large", estimated, true) {
+  if(bins == "large") {
+    binDat <- data.frame(bins = c("[0.0, 0.1)", "[0.1, 0.2)", "[0.2, 0.3)", 
+                      "[0.3, 0.4)", "[0.4, 0.5]"),
+                      min = c(0, 0.1, 0.2, 0.3, 0.4),
+                      max = c(0.1, 0.2, 0.3, 0.4, 0.5),
+                      x = rep(0, 5), 
+                      x2 = rep(0,5),
+                      intercept = rep(0, 5))
+  } else {
+    binDat <- data.frame(bins = c("[0.0, 0.05)", "[0.05, 0.1)", "[0.1, 0.15)","[0.15, 0.2)",
+                                  "[0.2, 0.25)", "[0.25, 0.3)", "[0.3, 0.35)", "[0.35, 0.4)",
+                                  "[0.4, 0.45)", "[0.45, 0.5]"),
+                      min = c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45),
+                      max = c(0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5),
+                      x = rep(0, 10), 
+                      x2 = rep(0, 10),
+                      intercept = rep(0, 10))
+  }
+  
+  # store the models and adjusted MAFs
+  dat <- data.frame(estimated = estimated, true = true)
+  adjusted <- rep(0, length(estimated))
+  
+  for(i in 1:nrow(binDat)) {
+    # filter data for model fitting to those within MAF bin
+    subdat <- dat %>% filter(true >= binDat[i,]$min &
+                               true < binDat[i,]$max)
+    mod <- lm(data = subdat, formula = estimated ~ poly(true, 2, raw = T))
+    
+    # get studentized residuals use to filter outliers and refit model
+    stud_res <- MASS::studres(mod)
+    tokeep <- which(abs(stud_res) < 3)
+    
+    mod2 <- lm(data = subdat[tokeep,], formula = estimated ~ poly(true,2, raw = T))
+    
+    # save refit model coefficients
+    binDat[i,]$intercept <- mod2$coefficients[1]
+    binDat[i,]$x <- mod2$coefficients[2]
+    binDat[i,]$x2 <- mod2$coefficients[3]
+    
+    # find indices of variants within this MAF bin
+    keeps <- which(dat$true >= binDat[i,]$min & dat$true < binDat[i,]$max)
+    pred = dat$true*mod2$coefficients[2] + dat$true^2*mod2$coefficients[3] + mod2$coefficients[1]
+    bias = dat$true - pred
+    # calculate and save adjusted MAF
+    adjusted[keeps] <- estimated[keeps] + bias[keeps]
+  }
+  return(list(models = binDat, adjusted = adjusted))
+}
+```
+
+## Test with 10% MAF bins
+
+```{r}
+# fit EUR model
+gnomad_filt <- gnomad %>% filter(maf_gnomad_EUR > 0.01)
+fit_EUR <- get_adjusted(bins = "large", estimated = gnomad$est_MAF_pop_EUR,
+                        true = gnomad$maf_gnomad_EUR)
+gnomad$maf_pop_EUR_corr = fit_EUR$adjusted
+
+# fit AFR model
+gnomad_filt <- gnomad %>% filter(maf_gnomad_AFR > 0.01)
+fit_AFR <- get_adjusted(bins = "large", estimated = gnomad$est_MAF_pop_AFR,
+                        true = gnomad$maf_gnomad_AFR)
+gnomad$maf_pop_AFR_corr = fit_AFR$adjusted
+```
+
+```{r}
+library(DescTools)
+```
+
+```{r}
+set.seed(2024)
+test_subset <- gnomad[sample(1:nrow(gnomad), 10000),]
+plotdata <- data.frame(true_maf_pop = c(test_subset$maf_pop_EUR, test_subset$maf_pop_AFR,
+                                        test_subset$maf_pop_EUR, test_subset$maf_pop_AFR),
+                       maf_pop = c(test_subset$est_MAF_pop_EUR,
+                                   test_subset$est_MAF_pop_AFR,
+                                   test_subset$maf_pop_EUR_corr,
+                                   test_subset$maf_pop_AFR_corr),
+                       pop = c(rep("EUR", nrow(test_subset)),
+                               rep("AFR", nrow(test_subset)),
+                               rep("EUR", nrow(test_subset)),
+                               rep("AFR", nrow(test_subset))),
+                       type = c(rep("Uncorrected", nrow(test_subset)),
+                                rep("Uncorrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset))))
+
+ccc <- data.frame(type = c("Corrected", "Corrected", "Uncorrected", "Uncorrected"),
+                  pop = c("AFR", "EUR", "AFR", "EUR"),
+                  ccc = c(CCC(test_subset$maf_pop_AFR,
+                              test_subset$maf_pop_AFR_corr)$rho.c$est,
+                          CCC(test_subset$maf_pop_EUR,
+                              test_subset$maf_pop_EUR_corr)$rho.c$est,
+                          CCC(test_subset$maf_pop_AFR,
+                              test_subset$est_MAF_pop_AFR)$rho.c$est,
+                          CCC(test_subset$maf_pop_EUR,
+                              test_subset$est_MAF_pop_EUR)$rho.c$est),
+                  x = c(0.07, 0.07, 0.07, 0.07),
+                  y = c(0.4, 0.4, 0.46, 0.46))
+ccc$ccc <- round(ccc$ccc, 4)
+ccc$label = paste0("CCC = ", ccc$ccc)
+
+p <- ggplot(plotdata[sample(1:nrow(plotdata), 30000),] %>% filter(true_maf_pop > 0.01), 
+                 aes(x = true_maf_pop, y = maf_pop, color = type)) +
+  geom_point(alpha = 0.5) +
+  geom_text(data = ccc, aes(x = x, y = y, label = label, colour = type), show.legend = F) +
+  coord_cartesian(xlim = c(0,.5), ylim = c(0,0.5)) +
+  scale_color_manual(values = c("grey40", "black")) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "darkred") +
+  ggtitle("Estimated vs True PanUKBB Diabetes Chromosome 1") +
+  xlab("True MAF (Y)") + ylab("Estimated MAF (Y')") +
+  theme_bw() +
+  facet_wrap(~pop) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 16),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        strip.text = element_text(size = 14),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+# ggsave(plot = p, filename = "gnomADCorrection_chr1_x2_10percentbins.png", device = "png",
+#        dpi = 300, width = 11, height = 7, units = "in")
+p
+```
+
+```{r}
+dat <- data.frame(x = test_subset[test_subset$maf_gnomad_EUR < 0.5,]$maf_gnomad_EUR)
+adj = dat$x
+  for(i in 1:nrow(fit_EUR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_EUR$models[i,]$min & dat$x < fit_EUR$models[i,]$max)
+    
+    pred = dat$x*fit_EUR$models[i,]$x + dat$x^2*fit_EUR$models[i,]$x2 + fit_EUR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+ggplot(test_subset[sample(1:nrow(test_subset), 10000),], 
+       aes(x = maf_gnomad_EUR, y = est_MAF_pop_EUR)) +
+  geom_point() + 
+  geom_line(data = dat, aes(x = x, y = y), color = "red") +
+  xlim(c(0,.5))
+```
+
+```{r}
+dat <- data.frame(x = test_subset[test_subset$maf_gnomad_AFR < 0.5,]$maf_gnomad_AFR)
+adj = dat$x
+  for(i in 1:nrow(fit_AFR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_AFR$models[i,]$min & dat$x < fit_AFR$models[i,]$max)
+    
+    pred = dat$x*fit_AFR$models[i,]$x + dat$x^2*fit_AFR$models[i,]$x2 + fit_AFR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+ggplot(test_subset[sample(1:nrow(test_subset), 10000),], 
+       aes(x = maf_gnomad_AFR, y = est_MAF_pop_AFR)) +
+  geom_point() + 
+  geom_line(data = dat, aes(x = x, y = y), color = "red") +
+  xlim(c(0,.5))
+```
+
+Get least squares for the two models
+```{r}
+# EUR
+dat <- data.frame(x = test_subset$maf_gnomad_EUR)
+adj = dat$x
+  for(i in 1:nrow(fit_EUR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_EUR$models[i,]$min & dat$x < fit_EUR$models[i,]$max)
+    
+    pred = dat$x*fit_EUR$models[i,]$x + dat$x^2*fit_EUR$models[i,]$x2 + fit_EUR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+LS_EUR_10 <- sum((dat$y-dat$x)^2)
+LS_EUR_10
+```
+
+```{r}
+dat <- data.frame(x = test_subset$maf_gnomad_AFR)
+adj = dat$x
+  for(i in 1:nrow(fit_AFR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_AFR$models[i,]$min & dat$x < fit_AFR$models[i,]$max)
+    
+    pred = dat$x*fit_AFR$models[i,]$x + dat$x^2*fit_AFR$models[i,]$x2 + fit_AFR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+LS_AFR_10 <- sum((dat$y-dat$x)^2)
+LS_AFR_10
+```
+
+## Test With smaller (5%) MAF bins
+```{r}
+# fit EUR model
+gnomad_filt <- gnomad %>% filter(maf_gnomad_EUR > 0.01)
+fit_EUR <- get_adjusted(bins = "small", estimated = gnomad$est_MAF_pop_EUR,
+                        true = gnomad$maf_gnomad_EUR)
+gnomad$maf_pop_EUR_corr2 = fit_EUR$adjusted
+
+# fit AFR model
+gnomad_filt <- gnomad %>% filter(maf_gnomad_AFR > 0.01)
+fit_AFR <- get_adjusted(bins = "small", estimated = gnomad$est_MAF_pop_AFR,
+                        true = gnomad$maf_gnomad_AFR)
+gnomad$maf_pop_AFR_corr2 = fit_AFR$adjusted
+
+test_subset <- gnomad[sample(1:nrow(gnomad), 10000),]
+plotdata <- data.frame(true_maf_pop = c(test_subset$maf_pop_EUR, test_subset$maf_pop_AFR,
+                                        test_subset$maf_pop_EUR, test_subset$maf_pop_AFR),
+                       maf_pop = c(test_subset$est_MAF_pop_EUR,
+                                   test_subset$est_MAF_pop_AFR,
+                                   test_subset$maf_pop_EUR_corr2,
+                                   test_subset$maf_pop_AFR_corr2),
+                       pop = c(rep("EUR", nrow(test_subset)),
+                               rep("AFR", nrow(test_subset)),
+                               rep("EUR", nrow(test_subset)),
+                               rep("AFR", nrow(test_subset))),
+                       type = c(rep("Uncorrected", nrow(test_subset)),
+                                rep("Uncorrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset))))
+ggplot(plotdata[sample(1:nrow(plotdata), 30000),] %>% filter(true_maf_pop > 0.01), 
+                 aes(x = true_maf_pop, y = maf_pop, color = type)) +
+  geom_point(alpha = 0.5) +
+  scale_color_manual(values = c("grey40", "black")) +
+  coord_cartesian(xlim = c(0,.5), ylim = c(0,0.5)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "darkred") +
+  ggtitle("Estimated vs True PanUKBB Diabetes Chromosome 1") +
+  xlab("True MAF (Y)") + ylab("Estimated MAF (Y')") +
+  theme_bw() +
+  facet_wrap(~pop)
+```
+
+```{r}
+dat <- data.frame(x = test_subset[test_subset$maf_gnomad_EUR < 0.5,]$maf_gnomad_EUR)
+adj = dat$x
+  for(i in 1:nrow(fit_EUR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_EUR$models[i,]$min & dat$x < fit_EUR$models[i,]$max)
+    
+    pred = dat$x*fit_EUR$models[i,]$x + dat$x^2*fit_EUR$models[i,]$x2 + fit_EUR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+ggplot(test_subset[sample(1:nrow(test_subset), 10000),], 
+       aes(x = maf_gnomad_EUR, y = est_MAF_pop_EUR)) +
+  geom_point() + 
+  geom_line(data = dat, aes(x = x, y = y), color = "red") +
+  xlim(c(0,.5))
+```
+
+```{r}
+dat <- data.frame(x = test_subset[test_subset$maf_gnomad_AFR < 0.5,]$maf_gnomad_AFR)
+adj = dat$x
+  for(i in 1:nrow(fit_AFR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_AFR$models[i,]$min & dat$x < fit_AFR$models[i,]$max)
+    
+    pred = dat$x*fit_AFR$models[i,]$x + dat$x^2*fit_AFR$models[i,]$x2 + fit_AFR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+ggplot(test_subset[sample(1:nrow(test_subset), 10000),], 
+       aes(x = maf_gnomad_AFR, y = est_MAF_pop_AFR)) +
+  geom_point() + 
+  geom_line(data = dat, aes(x = x, y = y), color = "red") +
+  xlim(c(0,.5))
+```
+
+Get least squares for the two models
+```{r}
+# EUR
+dat <- data.frame(x = test_subset$maf_gnomad_EUR)
+adj = dat$x
+  for(i in 1:nrow(fit_EUR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_EUR$models[i,]$min & dat$x < fit_EUR$models[i,]$max)
+    
+    pred = dat$x*fit_EUR$models[i,]$x + dat$x^2*fit_EUR$models[i,]$x2 + fit_EUR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+LS_EUR_5 <- sum((dat$y-dat$x)^2)
+LS_EUR_5
+```
+
+```{r}
+dat <- data.frame(x = test_subset$maf_gnomad_AFR)
+adj = dat$x
+  for(i in 1:nrow(fit_AFR$models)) {
+    # get indices for variants within MAF bin
+    keeps <- which(dat$x >= fit_AFR$models[i,]$min & dat$x < fit_AFR$models[i,]$max)
+    
+    pred = dat$x*fit_AFR$models[i,]$x + dat$x^2*fit_AFR$models[i,]$x2 + fit_AFR$models[i,]$intercept
+    adj[keeps] <- pred[keeps]
+  }
+dat$y <- adj
+
+LS_AFR_5 <- sum((dat$y-dat$x)^2)
+LS_AFR_5
+```
+
+### Compare LS
+```{r}
+print(data.frame(LS_EUR_5, LS_EUR_10, LS_AFR_5, LS_AFR_10))
+```
+
+## Using Summix2 to adjust gnomAD AFR/AFRAM
+
+```{r}
+library(Summix, lib = "C:/Users/HayBa/Documents/R/myLibs/")
+library(nloptr, lib = "C:/Users/HayBa/Documents/R/myLibs/")
+summix_dat <- gnomad
+summix_dat$ukbb_EUR <- summix_dat$af_cases_EUR
+summix_dat$ukbb_AFR <- summix_dat$af_cases_AFR
+summix_dat <- summix_dat %>% rowwise() %>%
+  mutate(ref_AFR = ifelse(flipped == 1, 1-AF_AFR, AF_AFR),
+         ref_EAS = ifelse(flipped == 1, 1-AF_EAS, AF_EAS),
+         ref_EUR = ifelse(flipped == 1, 1-AF_EUR, AF_EUR),
+         ref_IAM = ifelse(flipped == 1, 1-AF_IAM, AF_IAM),
+         ref_SAS = ifelse(flipped == 1, 1-AF_SAS, AF_SAS))
+summix(data = summix_dat,
+       reference = c("ref_AFR", "ref_EUR", "ref_EAS", "ref_SAS", "ref_IAM"),
+       observed = "match_AFafr")
+
+summix(data = summix_dat,
+       reference = c("ref_AFR", "ref_EUR", "ref_EAS", "ref_SAS", "ref_IAM"),
+       observed = "ukbb_AFR")
+```
+
+```{r}
+AFR_adj <- adjAF(summix_dat %>% select(match_AFafr, ref_AFR, ref_EUR),
+                 reference = c("ref_AFR", "ref_EUR"),
+                 observed = "match_AFafr",
+                 pi.target = c(0.93, 0.07),
+                 pi.observed = c(0.82, 0.18),
+                 adj_method = "average",
+                 filter = FALSE,
+                 N_reference = c(704, 741),
+                 N_observed = 20744)
+
+gnomad$AFafr_adj <- AFR_adj$adjusted.AF$adjustedAF
+gnomad <- gnomad %>% rowwise() %>%
+  mutate(maf_gnomad_AFR_adj = ifelse(AFafr_adj > 0.5, 1-AFafr_adj, AFafr_adj))
+```
+
+```{r}
+# fit AFR - summix adjusted - model
+gnomad_filt <- gnomad %>% filter(maf_gnomad_AFR > 0.01)
+fit_AFR <- get_adjusted(bins = "large", estimated = gnomad$est_MAF_pop_AFR,
+                        true = gnomad$maf_gnomad_AFR_adj)
+gnomad$maf_pop_AFR_corr_adj = fit_AFR$adjusted
+```
+
+```{r}
+set.seed(2024)
+test_subset <- gnomad[sample(1:nrow(gnomad), 10000),]
+plotdata <- data.frame(true_maf_pop = c(test_subset$maf_pop_AFR, test_subset$maf_pop_AFR,
+                                        test_subset$maf_pop_AFR, test_subset$maf_pop_AFR),
+                       maf_pop = c(test_subset$est_MAF_pop_AFR,
+                                   test_subset$est_MAF_pop_AFR,
+                                   test_subset$maf_pop_AFR_corr,
+                                   test_subset$maf_pop_AFR_corr_adj),
+                       pop = c(rep("AFR - gnomAD AFR/AFRAM", nrow(test_subset)),
+                               rep("AFR - summix adjusted", nrow(test_subset)),
+                               rep("AFR - gnomAD AFR/AFRAM", nrow(test_subset)),
+                               rep("AFR - summix adjusted", nrow(test_subset))),
+                       type = c(rep("Uncorrected", nrow(test_subset)),
+                                rep("Uncorrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset)),
+                                rep("Corrected", nrow(test_subset))))
+
+ccc <- data.frame(type = c("Corrected", "Corrected", "Uncorrected", "Uncorrected"),
+                  pop = c("AFR - gnomAD AFR/AFRAM", 
+                          "AFR - summix adjusted", 
+                          "AFR - gnomAD AFR/AFRAM", 
+                          "AFR - summix adjusted"),
+                  ccc = c(CCC(test_subset$maf_pop_AFR,
+                              test_subset$maf_pop_AFR_corr)$rho.c$est,
+                          CCC(test_subset$maf_pop_AFR,
+                              test_subset$maf_pop_AFR_corr_adj)$rho.c$est,
+                          CCC(test_subset$maf_pop_AFR,
+                              test_subset$est_MAF_pop_AFR)$rho.c$est,
+                          CCC(test_subset$maf_pop_AFR,
+                              test_subset$est_MAF_pop_AFR)$rho.c$est),
+                  x = c(0.07, 0.07, 0.07, 0.07),
+                  y = c(0.4, 0.4, 0.46, 0.46))
+ccc$ccc <- round(ccc$ccc, 4)
+ccc$label = paste0("CCC = ", ccc$ccc)
+
+p2 <- ggplot(plotdata[sample(1:nrow(plotdata), 30000),] %>% filter(true_maf_pop > 0.01), 
+                 aes(x = true_maf_pop, y = maf_pop, color = type)) +
+  geom_point(alpha = 0.5) +
+  geom_text(data = ccc, aes(x = x, y = y, label = label, colour = type), show.legend = F) +
+  coord_cartesian(xlim = c(0,.5), ylim = c(0,0.5)) +
+  scale_color_manual(values = c("grey40", "black")) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "darkred") +
+  ggtitle("Estimated vs True PanUKBB Diabetes Chromosome 1") +
+  xlab("True MAF (Y)") + ylab("Estimated MAF (Y')") +
+  theme_bw() +
+  facet_wrap(~pop) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 16),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        strip.text = element_text(size = 14),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+# ggsave(plot = p2, filename = "gnomADCorrection_chr1_x2_summixadj.png", device = "png",
+#        dpi = 300, width = 11, height = 7, units = "in")
+p2
+```
