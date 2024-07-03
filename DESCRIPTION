@@ -1,7 +1,7 @@
 Package: CaseControlAF
 Type: Package
 Title: Case Control Allele Frequency Reconstruction 
-Version: 0.1.0
+Version: 0.99.0
 Author: Hayley Wolff (Stoneman)
 Maintainer: Hayley Wolff <hayley.wolff@cuanschutz.edu>
 Description: Functions to reconstruct case and control AFs from summary statistics. 
