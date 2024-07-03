@@ -200,3 +200,6 @@ results_se_corr <- CaseControl_SE(N_case = 16550,
 head(results_se_corr)
 ```
 
+```{r}
+SessionInfo()
+```
