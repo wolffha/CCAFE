@@ -1,0 +1,202 @@
+---
+title: "CaseControlAF Vignette"
+author: "Hayley Stoneman"
+date: "2024-07-03"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{CaseControlAF}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# Introduction
+
+*Motivation*
+
+Growth in the field of genetic and genomic research has vastly increased the amount of available data which is often made publicly available through summary statistics. While there are many opportunities and new methods to use summary-level genetic data, it is often limited by the statistics that are made available. Many post-hoc analyses of disease data require case and control allele frequencies (AFs), which are not always published.  We present a framework to derive the case and control AFs from Genome Wide Association Study (GWAS) summary statistics using the whole sample (case and control aggregated) AF, odds ratio, and case and control sample sizes, and compare it to a previously published method that uses the standard error (SE), odds ratio, and case and control sample sizes to recapitulate case and control AFs. 
+
+*Results*
+
+In simulations and real data, we find estimating case and control AFs using the whole sample AF is highly accurate across all settings. When applying this method to the Pan-UK Biobank we find high concordance with the known AFs. Conversely, we find that in Pan-UK Biobank and simulations including covariates, deriving case and control AFs from the SE underestimates the minor AF (MAF) for higher MAFs. To enable estimation of case and control AFs using SE, we use gnomAD v3.1.2 AFs as a proxy for true AFs to estimate and correct for bias fit. While estimating the case control AF using the whole sample AF is preferred due to its high accuracy, estimating from the SE can be used more broadly since the SE can be calculated from the p-value and beta estimate, which are more commonly provided. Both methods expand the utility of publicly available genetic summary statistics, can be used when different statistics are reported, and promote the reusability of genomic data.  
+
+
+<br><br>
+This document introduces you to the functions in CaseControlAF and gives small examples of how they can be used with summary statistics.
+
+<br><br>
+Find more details and documentation on GitHub: (https://wolffha.github.io/CaseControlAF/)
+
+<br><br>
+To jump forward to individual function specifics:
+
+[**CaseControl_AF**](#CaesControl_AF) -- [fast forward to example](#a-quick-demo-of-CaseControl_AF)
+[**CaseControl_SE**](#CaesControl_SE) -- [fast forward to example](#a-quick-demo-of-CaseControl_SE)
+<br><br><br>
+
+
+# Installation
+
+To install this package from BioConductor:
+
+```{r, eval = FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("CaseControlAF")
+```
+
+To install this package from GitHub:
+
+```{r, eval = FALSE}
+if(!require(devtools, quietly = TRUE)) {
+  install.packages("devtools")
+}
+
+devtools::install_github("https://github.com/wolffha/CaseControlAF")
+```
+
+## Overview of CaseControlAF Functions
+
+CaseControlAF contains two functions: 
+
+* **CaseControl_AF()**
+* **CaseControl_SE()**
+
+The two functions are both used to reconstruct case and control allele frequencies (AFs) from genetic summary statistics. 
+
+The user will select which function to use based on the available summary statistics.
+
+**CaseControl_AF()** has the following required parameters:
+
+* Number of cases
+* Number of controls
+* Odds Ratio (OR) or beta coefficient
+* **AF** for the whole sample (cases and controls combined)
+
+**CaseControl_SE()** has the follwoing required parameters:
+
+* Number of cases
+* Number of controls
+* Odds Ratio (OR) or beta coefficient
+* **SE** of the log(OR) for each variant
+
+*Code adapted from ReACt GroupFreq function available here: (https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c)*
+
+# CaseControl_AF {#CaseControl_AF}
+
+## CaseControl_AF() input
+
+* **N_case**: an integer for the number of case samples
+* **N_control**: an integer for the number of control samples
+* **OR**: a numeric vector with the OR (or exp(beta)) for each variant
+* **AF_population**: a numeric vector with the AF for each variant
+
+## CaseControl_AF() output
+
+Returns a dataframe with two columns: 
+
+* AF_case 
+* AF_control
+
+The number of rows is equal to the number of variants.
+
+# CaseControl_SE {#CaseControl_SE}
+
+## CaseControl_SE() input
+
+CaseControl_SE has the following required inputs:
+
+* **N_case**: an integer for the number of case samples
+* **N_control**: an integer for the number of control samples
+* **OR**: a numeric vector with the OR (or exp(beta)) for each variant
+* **SE**: a numeric vector with the SE(log(OR)) for each variant
+
+In order to correct the bias in these estimates, the user has the option to provide proxy AFs for the true whole sample (population) minor AFs (MAFs). To do so, the following option parameter can be included:
+
+* **proxyMAFs**: a vector with MAFs for each variant from a proxy sample
+
+## CaseControl_SE() output
+
+Returns a dataframe with three columns: 
+
+* MAF_case
+* MAF_control 
+* MAF_pop 
+
+Each columns contains the estimated MAF in the cases, controls, and whole sample, respectively. 
+The number of rows is equal to the number of variants
+
+If proxyMAFs was provided, three additional columns are included in the dataframe:
+
+* MAF_case_adj
+* MAF_control_adj 
+* MAF_pop_adj
+
+These are the MAFs adjusted using the framework described here using the proxy MAFs to model the expected bias.
+
+*NOTE:* This method assumes we are estimating the minor allele frequency (MAF)
+
+# Examples
+
+These examples use the provided sample data which is a subset of 500 variants from chromosome 1 of the Pan-UKBB diabetes GWAS in non-Finnish European individuals.
+
+## A quick demo of CaseControl_AF() {#a-quick-demo-of-CaseControl_AF}
+
+```{r CaseControl_AF example}
+library(CaseControlAF)
+
+# load the data
+data("sampleDat")
+
+results_af <- CaseControl_AF(N_case = 16550,
+                             N_control = 403923,
+                             OR = sampleDat$OR,
+                             AF_population = sampleDat$true_maf_pop)
+
+head(results_af)
+```
+
+## A quick demo of CaseControl_SE() {#a-quick-demo-of-CaseControl_SE}
+
+```{r CaseControl_SE example - no correction}
+library(CaseControlAF)
+
+# load the data
+data("sampleDat")
+
+# First run without correction
+results_se_noCorr <- CaseControl_SE(N_case = 16550,
+                                    N_control = 403923,
+                                    OR = sampleDat$OR,
+                                    SE = sampleDat$SE)
+head(results_se_noCorr)
+```
+
+```{r CaseControl_SE example - correction}
+library(CaseControlAF)
+
+# load the data
+data("sampleDat")
+
+# now run with correction
+results_se_corr <- CaseControl_SE(N_case = 16550,
+                                  N_control = 403923,
+                                  OR = sampleDat$OR,
+                                  SE = sampleDat$SE,
+                                  proxyMAFs = sampleDat$gnomad_maf)
+
+head(results_se_corr)
+```
+
