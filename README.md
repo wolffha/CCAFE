@@ -52,7 +52,9 @@ Use this function when you have the following statistics (for each variant)
 
 **SE**: a numeric vector with the SE(log(OR)) for each variant
 
-Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_pop containing the estimated minor allele frequency in the cases, controls, and whole sample. The number of rows is equal to the number of variants
+**proxyMAFs**: *OPTIONAL* a numeric vector with the MAFs from a proxy for the whole sample (ex: gnomAD) for each variant
+
+Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_pop containing the estimated minor allele frequency in the cases, controls, and whole sample. The number of rows is equal to the number of variants. If proxyMAFs is provided, three additional columns are included: MAF_case_adj, MAF_control_adj, and MAF_pop_adj with the adjusted MAF estimates using the proxyMAFs to model the estimated bias. 
 
 **NOTE:** This method assumes we are estimating the minor allele frequency (MAF)
 
