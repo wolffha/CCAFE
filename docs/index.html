@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">CaseControlAF</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.0</span>
       </span>
     </div>
 
@@ -68,8 +68,14 @@
 <div class="section level2">
 <h2 id="download-the-package">Download the package<a class="anchor" aria-label="anchor" href="#download-the-package"></a>
 </h2>
-<p>To download this package using <em>devtools</em> in R:</p>
+<p>To install this package using BioConductor:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"CaseControlAF"</span><span class="op">)</span></span></code></pre></div>
+<p>To download this package using <em>devtools</em> in R:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"https://github.com/wolffha/CaseControlAF"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -82,15 +88,16 @@
 <li>Number of controls</li>
 <li>Odds Ratio (OR) or beta coefficient</li>
 <li>
-<strong>AF</strong> for the whole sample (cases and controls combined)</li>
+<strong>AF</strong> (allele frequency) for the total sample (cases and controls combined)</li>
 </ul>
 <div class="section level3">
 <h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h3>
+<p><strong>data</strong>: a dataframe with a row for each variant and columns for OR and total AF</p>
 <p><strong>N_case</strong>: an integer for the number of case samples</p>
 <p><strong>N_control</strong>: an integer for the number of control samples</p>
-<p><strong>OR</strong>: a numeric vector with the OR (or exp(beta)) for each variant</p>
-<p><strong>AF_population</strong>: a numeric vector with the AF for each variant</p>
+<p><strong>OR_colname</strong>: a string containing the exact column name in ‘data’ with the OR</p>
+<p><strong>AF_total_colname</strong>: a string containing the exact column name in ‘data’ with the total AF</p>
 <p>Returns a dataframe with two columns: AF_case and AF_control. The number of rows is equal to the number of variants.</p>
 </div>
 </div>
@@ -109,72 +116,75 @@
 <div class="section level3">
 <h3 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a>
 </h3>
+<p><strong>data</strong>: a dataframe with a row for each variant and columns for OR, SE, and optionally proxy MAFs</p>
 <p><strong>N_case</strong>: an integer for the number of case samples</p>
 <p><strong>N_control</strong>: an integer for the number of control samples</p>
-<p><strong>OR</strong>: a numeric vector with the OR (or exp(beta)) for each variant</p>
-<p><strong>SE</strong>: a numeric vector with the SE(log(OR)) for each variant</p>
-<p>Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_pop containing the estimated minor allele frequency in the cases, controls, and whole sample. The number of rows is equal to the number of variants</p>
+<p><strong>OR_colname</strong>: a string containing the exact column name in ‘data’ with the OR</p>
+<p><strong>SE_colname</strong>: a string containing the exact column name in ‘data’ with the SE</p>
+<p><strong>proxyMAFs_colname</strong>: a string containing the exact column name in ‘data’ with the proxy MAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA</p>
+<p>Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_total containing the estimated minor allele frequency in the cases, controls, and total sample. The number of rows is equal to the number of variants. If proxyMAFs_colname is not NA, will include three additional columns containing the adjusted estimated MAFs (MAF_case_adj, MAF_control_adj, MAF_total_adj)</p>
 <p><strong>NOTE:</strong> This method assumes we are estimating the minor allele frequency (MAF)</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="a-small-example">A small example<a class="anchor" aria-label="anchor" href="#a-small-example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load the data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span>
-<span><span class="co"># this sample data contains 500 variants from chromosome 1 of Pan-UKBB Diabetes GWAS</span></span>
-<span></span>
-<span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span>
-<span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span></span>
-<span><span class="co"># A tibble: 6 × 11</span></span>
-<span><span class="co"># Rowwise: </span></span>
-<span><span class="co">#  CHR         POS REF   ALT   true_maf_case true_maf_control      beta     SE gnomad_maf    OR true_maf_pop</span></span>
-<span><span class="co">#  &lt;chr&gt;     &lt;int&gt; &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;</span></span>
-<span><span class="co">#1 chr1  226824710 C     T         0.205            0.204      0.000344 0.0147  0.204     1.00     0.204    </span></span>
-<span><span class="co">#2 chr1  117812346 G     A         0.448            0.447     -0.00139  0.0120  0.446     0.999    0.447    </span></span>
-<span><span class="co">#3 chr1  230838863 C     T         0.165            0.164      0.00422  0.0162  0.183     1.00     0.164    </span></span>
-<span><span class="co">#4 chr1   93121792 ATT   A         0                0         -0.106    3.53    0.000108  0.900    0        </span></span>
-<span><span class="co">#5 chr1  240236388 G     A         0.0000111        0.0000378 -1.25     1.25    0.0000882 0.285    0.0000367</span></span>
-<span><span class="co">#6 chr1   12385196 G     A         0.0139           0.0140    -0.0153   0.0505  0.0116    0.985    0.0140 </span></span>
-<span></span>
-<span><span class="va">af_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_AF.html">CaseControl_AF</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
-<span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
-<span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
-<span>                                    AF_population <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_pop</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span></span>
-<span><span class="co">#       AF_case   AF_control</span></span>
-<span><span class="co">#1 2.041813e-01 2.041254e-01</span></span>
-<span><span class="co">#2 4.468049e-01 4.471490e-01</span></span>
-<span><span class="co">#3 1.647775e-01 1.641968e-01</span></span>
-<span><span class="co">#4 0.000000e+00 0.000000e+00</span></span>
-<span><span class="co">#5 1.077692e-05 3.776488e-05</span></span>
-<span><span class="co">#6 1.381395e-02 1.402353e-02</span></span>
-<span></span>
-<span><span class="co"># visualise the bias in the results compared to the published true AFs</span></span>
-<span><span class="va">plotdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>estimated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">$</span><span class="va">AF_case</span>, <span class="va">af_method_results</span><span class="op">$</span><span class="va">AF_control</span><span class="op">)</span>,</span>
-<span>                       true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>, </span>
-<span>                                <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span><span class="op">)</span>,</span>
-<span>                       status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Case"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>                       <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Control"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># plot the results</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plotdata</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true</span>, y <span class="op">=</span> <span class="va">estimated</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"True AF"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"Estimated AF"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">status</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># load the data</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"sampleDat"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># this sample data contains 500 variants from chromosome 1 of Pan-UKBB Diabetes GWAS</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>nCase_sample <span class="ot">=</span> <span class="dv">16550</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>nControl_sample <span class="ot">=</span> <span class="dv">403923</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">head</span>(sampleDat)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># A tibble: 6 × 11</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Rowwise: </span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#  CHR         POS REF   ALT   true_maf_case true_maf_control      beta     SE gnomad_maf    OR true_maf_pop</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#  &lt;chr&gt;     &lt;int&gt; &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#1 chr1  226824710 C     T         0.205            0.204      0.000344 0.0147  0.204     1.00     0.204    </span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#2 chr1  117812346 G     A         0.448            0.447     -0.00139  0.0120  0.446     0.999    0.447    </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#3 chr1  230838863 C     T         0.165            0.164      0.00422  0.0162  0.183     1.00     0.164    </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#4 chr1   93121792 ATT   A         0                0         -0.106    3.53    0.000108  0.900    0        </span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#5 chr1  240236388 G     A         0.0000111        0.0000378 -1.25     1.25    0.0000882 0.285    0.0000367</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#6 chr1   12385196 G     A         0.0139           0.0140    -0.0153   0.0505  0.0116    0.985    0.0140 </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>af_method_results <span class="ot">&lt;-</span> <span class="fu">CaseControl_AF</span>(<span class="at">data =</span> sampleDat,</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>                                    <span class="at">N_case =</span> nCase_sample,</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>                                    <span class="at">N_control =</span> nControl_sample,</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>                                    <span class="at">OR =</span> <span class="st">"OR"",</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="st">                                    AF_total_colname = "</span>true_maf_pop<span class="st">")</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="st">head(af_method_results)</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="st">#       AF_case   AF_control</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="st">#1 2.041813e-01 2.041254e-01</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="st">#2 4.468049e-01 4.471490e-01</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="st">#3 1.647775e-01 1.641968e-01</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="st">#4 0.000000e+00 0.000000e+00</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="st">#5 1.077692e-05 3.776488e-05</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="st">#6 1.381395e-02 1.402353e-02</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="st"># visualise the bias in the results compared to the published true AFs</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="st">plotdata &lt;- data.frame(estimated = c(af_method_results$AF_case, af_method_results$AF_control),</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="st">                       true = c(sampleDat$true_maf_case, </span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="st">                                sampleDat$true_maf_control),</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="st">                       status = c(rep("</span>Case<span class="st">", nrow(af_method_results)), </span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="st">                       rep("</span>Control<span class="st">", nrow(af_method_results))))</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="st"># plot the results</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="st">ggplot(plotdata, aes(x = true, y = estimated)) +</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="st">  geom_point() +</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="st">  geom_abline(intercept = 0, slope = 1, linetype = "</span>dashed<span class="st">", color = "</span>grey40<span class="st">") +</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="st">  xlab("</span>True AF<span class="st">") + ylab("</span>Estimated AF<span class="st">") +</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="st">  theme_bw() +</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="st">  facet_wrap(~status)</span></span></code></pre></div>
 <p><img src="reference/figures/CaseControl_AF_example.png" height="70%" width="70%"></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sampleDat</span>,</span>
+<span>                                    N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
 <span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
-<span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
-<span>                                    SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span></span>
+<span>                                    OR <span class="op">=</span> <span class="st">"OR"</span>,</span>
+<span>                                    SE <span class="op">=</span> <span class="st">"SE"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span></span>
-<span><span class="co">#      MAF_case  MAF_control      MAF_pop</span></span>
+<span><span class="co">#      MAF_case  MAF_control    MAF_total</span></span>
 <span><span class="co">#1 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
 <span><span class="co">#2 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
 <span><span class="co">#3 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
@@ -196,13 +206,14 @@
 <span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">status</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/CaseControl_SE_example.png" height="70%" width="70%"></p>
-<p>Here we observe distinct bias, which increases as the MAF increases. We will then use the correction framework described in our paper and implemented here to use gnomAD as a proxy for the true MAF_pop.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
+<p>Here we observe distinct bias, which increases as the MAF increases. We will then use the correction framework described in our paper and implemented here to use gnomAD as a proxy for the true MAF_total.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CaseControl_SE.html">CaseControl_SE</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sampleDat</span>,</span>
+<span>                                    N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span>
 <span>                                     N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span>
-<span>                                     OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span>
-<span>                                     SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span>, </span>
-<span>                                     proxyMAFs <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">gnomad_maf</span><span class="op">)</span></span>
+<span>                                     OR_colname <span class="op">=</span> <span class="st">"OR"</span>,</span>
+<span>                                     SE_colname <span class="op">=</span> <span class="st">"SE"</span>, </span>
+<span>                                     proxyMAFs_colname <span class="op">=</span> <span class="st">"gnomad_maf"</span><span class="op">)</span></span>
 <span>                                     </span>
 <span><span class="va">plotdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>true_maf_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>, <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_case</span>,</span>
 <span>                                        <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span>, <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_control</span><span class="op">)</span>,</span>
@@ -276,7 +287,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>The package maintainer <br><small class="roles"> Maintainer </small>  </li>
+<li>Hayley Wolff <br><small class="roles"> Maintainer </small>  </li>
 </ul>
 </div>
 
@@ -288,7 +299,7 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by The package maintainer.</p>
+<p>Developed by Hayley Wolff.</p>
 </div>
 
 <div class="pkgdown">

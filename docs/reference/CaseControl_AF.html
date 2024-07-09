@@ -19,7 +19,7 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]"><!-- 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControlAF</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.0</span>
       </span>
     </div>
 
@@ -48,12 +48,22 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_AF</span><span class="op">(</span><span class="va">N_case</span>, <span class="va">N_control</span>, <span class="va">OR</span>, <span class="va">AF_population</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_AF</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  N_case <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  N_control <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  OR_colname <span class="op">=</span> <span class="st">"OR"</span>,</span>
+<span>  AF_total_colname <span class="op">=</span> <span class="st">"AF"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>N_case</dt>
+    <dl><dt>data</dt>
+<dd><p>dataframe with each row being a variant and columns for AF_total and OR</p></dd>
+
+
+<dt>N_case</dt>
 <dd><p>the number of cases in the sample</p></dd>
 
 
@@ -61,12 +71,12 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]</p>
 <dd><p>the number of controls in the sample</p></dd>
 
 
-<dt>OR</dt>
-<dd><p>a vector with the ORs</p></dd>
+<dt>OR_colname</dt>
+<dd><p>a string containing the exact column name in 'data' with the OR</p></dd>
 
 
-<dt>AF_population</dt>
-<dd><p>a vector with the observed sample AFs</p></dd>
+<dt>AF_total_colname</dt>
+<dd><p>a string containing the exact column name in 'data' with the whole sample AF</p></dd>
 
 </dl></div>
     <div id="value">
@@ -75,10 +85,6 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]</p>
 
 <p>returns a dataframe with two columns (AF_case, AF_control) and rows
 equal to the number of variants</p>
-    </div>
-    <div id="note">
-    <h2>Note</h2>
-    <p>Make sure the vectors are in the same order for your variants</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -95,16 +101,20 @@ equal to the number of variants</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CaseControlAF</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sampleDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span></span>
 <span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get the estimated case and control AFs</span></span></span>
-<span class="r-in"><span><span class="va">af_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_AF</span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
+<span class="r-in"><span><span class="va">af_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_AF</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sampleDat</span>,</span></span>
+<span class="r-in"><span>                                    N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
 <span class="r-in"><span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span></span>
-<span class="r-in"><span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span></span>
-<span class="r-in"><span>                                    AF_population <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">true_maf_pop</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                                    OR_colname <span class="op">=</span> <span class="st">"OR"</span>,</span></span>
+<span class="r-in"><span>                                    AF_total_colname <span class="op">=</span> <span class="st">"true_maf_pop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        AF_case   AF_control</span>
@@ -125,7 +135,7 @@ equal to the number of variants</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by The package maintainer.</p>
+  <p></p><p>Developed by Hayley Wolff.</p>
 </div>
 
 <div class="pkgdown">

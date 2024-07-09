@@ -4,16 +4,14 @@
 #' If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
 #' This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 #'
+#' @param data dataframe where each row is a variant and columns contain the OR, SE, and if applicable proxyMAFs
 #' @param N_case an integer of the number of Case individuals
 #' @param N_control an integer of the number of Control individuals
-#' @param OR a vector of odds ratios
-#' @param SE a vector of standard errors for the OR calculation *make sure the indices match between the two vectors
-#' @param proxyMAFs a vector of minor allele frequencies (MAFs) for the true whole sample MAF to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA
+#' @param OR_colname a string containing the exact column name in 'data' with the OR
+#' @param SE_colname a string containing the exact column name in 'data' with the SE
+#' @param proxyMAFs_colname a string containing the exact column name in 'data' with the proxyMAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA
 #'
-#' @note
-#'  Make sure the vectors are in the same order for your variants
-#'
-#' @return a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_pop_adj) with the adjusted estimates.
+#' @return a dataframe with 3 columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 #'
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
 #'
@@ -22,49 +20,73 @@
 #' @seealso \url{https://github.com/wolffha/CaseControlAF} for further documentation
 #'
 #' @examples
+#' library(CaseControlAF)
+#'
 #' data("sampleDat")
+#' sampleDat <- as.data.frame(sampleDat)
 #'
 #' nCase_sample = 16550
 #' nControl_sample = 403923
 #'
 #' # get the estimated case and control MAFs
-#' se_method_results <- CaseControl_SE(N_case = nCase_sample,
+#' se_method_results <- CaseControl_SE(data = sampleDat,
+#'                                     N_case = nCase_sample,
 #'                                     N_control = nControl_sample,
-#'                                     OR = sampleDat$OR,
-#'                                     SE = sampleDat$SE)
+#'                                     OR = "OR",
+#'                                     SE = "SE")
 #'
 #' head(se_method_results)
 #'
-#' @import genpwr
 #' @import dplyr
 #' @export
-CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
-  # genpwr package is used to solve for the roots of the quadratic equation
-  #require(genpwr)
-
+CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", SE_colname = "SE", proxyMAFs_colname = NA) {
   # do input checking
-  if(length(OR) != length(SE)) {
-    stop("ERROR: 'OR' and 'SE' vectors need to be the same length")
-  }
-  if(typeof(OR) != "double") {
-    stop("ERROR: 'OR' vector needs to be a vector of numbers (hint: check for NAs)")
-  }
-  if(typeof(SE) != "double") {
-    stop("ERROR: 'SE' vector needs to be a vector of numbers (hint: check for NAs)")
-  }
+
+  # check valid input for case/control sample size
   if(N_case <= 0) {
     stop("ERROR: 'N_case' needs to be a number > 0")
   }
   if(N_control <= 0) {
     stop("ERROR: 'N_control' needs to be a number > 0")
   }
-  if(length(proxyMAFs) != 1) {
-    if(length(proxyMAFs) != length(OR)) {
-      stop("ERROR: 'proxyMAFs' needs to be the same length as the vector of ORs. If you don't have proxy true MAFs then set proxyMAFs = NA")
+
+  # check valid input data type
+  if(!is.data.frame(data)) {
+    stop("ERROR: 'data' must be a dataframe")
+  }
+
+  # check that OR and SE columns exist
+  if(!OR_colname %in% colnames(data)) {
+    stop(paste0("ERROR: 'OR_colname': '", OR_colname, "' does not exist in 'data'"))
+  }
+  if(!SE_colname %in% colnames(data)) {
+    stop(paste0("ERROR: 'SE_colname': '", SE_colname, "' does not exist in 'data'"))
+  }
+  if(!is.na(proxyMAFs_colname)) {
+    if(!proxyMAFs_colname %in% colnames(data)) {
+      stop(paste0("ERROR: 'proxyMAFs_colname': '", proxyMAFs_colname, "' does not exist in 'data'"))
+    } else {
+      proxyMAFs <- data[,proxyMAFs_colname]
     }
   }
+
+  OR <- data[,OR_colname]
+  SE <- data[,SE_colname]
+
+  # check for valid input for OR and AF_total
+  if(typeof(OR) != "double") {
+    stop("ERROR: 'OR' values must all be numbers (hint: check for NAs)")
+  }
+  if(typeof(SE) != "double") {
+    stop("ERROR: 'SE' values must all be numbers (hint: check for NAs)")
+  }
   if(any(SE < 0)) {
-    stop("ERROR: 'SE' vector cannot contain negative values")
+    stop("ERROR: 'SE' cannot contain negative values")
+  }
+
+  # solve for real roots of a quadratic using the quadratic formula
+  quad_roots<-function(a,b,c){
+    c(((-b-sqrt(b^2-4*a*c))/(2*a)),((-b+sqrt(b^2-4*a*c))/(2*a)))
   }
 
   # this function uses w, x, y, z as the derivation in the ReACt paper does - see their supplement
@@ -99,7 +121,7 @@ CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
         c = y*z[i]*(x + y*z[i])
 
          #find roots of quadratic equation
-        AF_control_opts =  genpwr::quad_roots(a, b, c)
+        AF_control_opts =  quad_roots(a, b, c)
         # in order to select which root, we need to use each option (d1 and d2) to calculate a, b, c of the 2x2 table of allele counts
         d1 = AF_control_opts[1]
         c1 = y - d1
@@ -139,10 +161,10 @@ CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
   MAF_pop = (MAF_case*N_case + MAF_control*N_control)/(N_case + N_control)
 
   # correct the MAFs using the proxy MAFs
-  if(length(proxyMAFs) == 1){
+  if(is.na(proxyMAFs_colname)){
     return(data.frame(MAF_case = MAF_case,
                       MAF_control = MAF_control,
-                      MAF_pop = MAF_pop))
+                      MAF_total = MAF_pop))
   } else {
     get_adjusted <- function(bins = "large", estimated, true) {
       if(bins == "large") {
@@ -207,9 +229,9 @@ CaseControl_SE <- function(N_case, N_control, OR, SE, proxyMAFs = NA) {
 
     return(data.frame(MAF_case = MAF_case,
                       MAF_control = MAF_control,
-                      MAF_pop = MAF_pop,
+                      MAF_total = MAF_pop,
                       MAF_case_adj = MAF_case_adj,
                       MAF_control_adj = MAF_control_adj,
-                      MAF_pop_adj = MAF_pop_adj))
+                      MAF_total_adj = MAF_pop_adj))
   }
 }

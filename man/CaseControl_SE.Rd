@@ -4,21 +4,30 @@
 \alias{CaseControl_SE}
 \title{CaseControl_SE}
 \usage{
-CaseControl_SE(N_case, N_control, OR, SE, proxyMAFs = NA)
+CaseControl_SE(
+  data,
+  N_case = 0,
+  N_control = 0,
+  OR_colname = "OR",
+  SE_colname = "SE",
+  proxyMAFs_colname = NA
+)
 }
 \arguments{
+\item{data}{dataframe where each row is a variant and columns contain the OR, SE, and if applicable proxyMAFs}
+
 \item{N_case}{an integer of the number of Case individuals}
 
 \item{N_control}{an integer of the number of Control individuals}
 
-\item{OR}{a vector of odds ratios}
+\item{OR_colname}{a string containing the exact column name in 'data' with the OR}
 
-\item{SE}{a vector of standard errors for the OR calculation *make sure the indices match between the two vectors}
+\item{SE_colname}{a string containing the exact column name in 'data' with the SE}
 
-\item{proxyMAFs}{a vector of minor allele frequencies (MAFs) for the true whole sample MAF to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA}
+\item{proxyMAFs_colname}{a string containing the exact column name in 'data' with the proxyMAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA}
 }
 \value{
-a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_pop_adj) with the adjusted estimates.
+a dataframe with 3 columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 }
 \description{
 This is a function to derive the case and control AFs from GWAS summary statistics when
@@ -26,20 +35,21 @@ the user has access to the whole sample AF, the sample sizes, and the OR (or bet
 If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
 This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 }
-\note{
-Make sure the vectors are in the same order for your variants
-}
 \examples{
+library(CaseControlAF)
+
 data("sampleDat")
+sampleDat <- as.data.frame(sampleDat)
 
 nCase_sample = 16550
 nControl_sample = 403923
 
 # get the estimated case and control MAFs
-se_method_results <- CaseControl_SE(N_case = nCase_sample,
+se_method_results <- CaseControl_SE(data = sampleDat,
+                                    N_case = nCase_sample,
                                     N_control = nControl_sample,
-                                    OR = sampleDat$OR,
-                                    SE = sampleDat$SE)
+                                    OR = "OR",
+                                    SE = "SE")
 
 head(se_method_results)
 

@@ -4,16 +4,24 @@
 \alias{CaseControl_AF}
 \title{CaseControl_AF}
 \usage{
-CaseControl_AF(N_case, N_control, OR, AF_population)
+CaseControl_AF(
+  data,
+  N_case = 0,
+  N_control = 0,
+  OR_colname = "OR",
+  AF_total_colname = "AF"
+)
 }
 \arguments{
+\item{data}{dataframe with each row being a variant and columns for AF_total and OR}
+
 \item{N_case}{the number of cases in the sample}
 
 \item{N_control}{the number of controls in the sample}
 
-\item{OR}{a vector with the ORs}
+\item{OR_colname}{a string containing the exact column name in 'data' with the OR}
 
-\item{AF_population}{a vector with the observed sample AFs}
+\item{AF_total_colname}{a string containing the exact column name in 'data' with the whole sample AF}
 }
 \value{
 returns a dataframe with two columns (AF_case, AF_control) and rows
@@ -24,20 +32,21 @@ This is a function to derive the case and control AFs from GWAS summary statisti
 the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
 If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
 }
-\note{
-Make sure the vectors are in the same order for your variants
-}
 \examples{
+library(CaseControlAF)
+
 data("sampleDat")
+sampleDat <- as.data.frame(sampleDat)
 
 nCase_sample = 16550
 nControl_sample = 403923
 
 # get the estimated case and control AFs
-af_method_results <- CaseControl_AF(N_case = nCase_sample,
+af_method_results <- CaseControl_AF(data = sampleDat,
+                                    N_case = nCase_sample,
                                     N_control = nControl_sample,
-                                    OR = sampleDat$OR,
-                                    AF_population = sampleDat$true_maf_pop)
+                                    OR_colname = "OR",
+                                    AF_total_colname = "true_maf_pop")
 
 head(af_method_results)
 

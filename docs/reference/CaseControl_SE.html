@@ -20,7 +20,7 @@ This code uses the GroupFreq function adapted from C from &amp;lt;https://github
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CaseControlAF</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.0</span>
       </span>
     </div>
 
@@ -50,12 +50,23 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_SE</span><span class="op">(</span><span class="va">N_case</span>, <span class="va">N_control</span>, <span class="va">OR</span>, <span class="va">SE</span>, proxyMAFs <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">CaseControl_SE</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  N_case <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  N_control <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  OR_colname <span class="op">=</span> <span class="st">"OR"</span>,</span>
+<span>  SE_colname <span class="op">=</span> <span class="st">"SE"</span>,</span>
+<span>  proxyMAFs_colname <span class="op">=</span> <span class="cn">NA</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>N_case</dt>
+    <dl><dt>data</dt>
+<dd><p>dataframe where each row is a variant and columns contain the OR, SE, and if applicable proxyMAFs</p></dd>
+
+
+<dt>N_case</dt>
 <dd><p>an integer of the number of Case individuals</p></dd>
 
 
@@ -63,27 +74,23 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
 <dd><p>an integer of the number of Control individuals</p></dd>
 
 
-<dt>OR</dt>
-<dd><p>a vector of odds ratios</p></dd>
+<dt>OR_colname</dt>
+<dd><p>a string containing the exact column name in 'data' with the OR</p></dd>
 
 
-<dt>SE</dt>
-<dd><p>a vector of standard errors for the OR calculation *make sure the indices match between the two vectors</p></dd>
+<dt>SE_colname</dt>
+<dd><p>a string containing the exact column name in 'data' with the SE</p></dd>
 
 
-<dt>proxyMAFs</dt>
-<dd><p>a vector of minor allele frequencies (MAFs) for the true whole sample MAF to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA</p></dd>
+<dt>proxyMAFs_colname</dt>
+<dd><p>a string containing the exact column name in 'data' with the proxyMAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>a dataframe with 3 columns: MAF_case, MAF_control, MAF_pop for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_pop_adj) with the adjusted estimates.</p>
-    </div>
-    <div id="note">
-    <h2>Note</h2>
-    <p>Make sure the vectors are in the same order for your variants</p>
+<p>a dataframe with 3 columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -100,19 +107,23 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CaseControlAF</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sampleDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">nCase_sample</span> <span class="op">=</span> <span class="fl">16550</span></span></span>
 <span class="r-in"><span><span class="va">nControl_sample</span> <span class="op">=</span> <span class="fl">403923</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get the estimated case and control MAFs</span></span></span>
-<span class="r-in"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_SE</span><span class="op">(</span>N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
+<span class="r-in"><span><span class="va">se_method_results</span> <span class="op">&lt;-</span> <span class="fu">CaseControl_SE</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sampleDat</span>,</span></span>
+<span class="r-in"><span>                                    N_case <span class="op">=</span> <span class="va">nCase_sample</span>,</span></span>
 <span class="r-in"><span>                                    N_control <span class="op">=</span> <span class="va">nControl_sample</span>,</span></span>
-<span class="r-in"><span>                                    OR <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">OR</span>,</span></span>
-<span class="r-in"><span>                                    SE <span class="op">=</span> <span class="va">sampleDat</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                                    OR <span class="op">=</span> <span class="st">"OR"</span>,</span></span>
+<span class="r-in"><span>                                    SE <span class="op">=</span> <span class="st">"SE"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">se_method_results</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       MAF_case  MAF_control      MAF_pop</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       MAF_case  MAF_control    MAF_total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 1.764905e-01 1.764405e-01 1.764425e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 3.263835e-01 3.266896e-01 3.266776e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.392353e-01 1.387297e-01 1.387496e-01</span>
@@ -130,7 +141,7 @@ This code uses the GroupFreq function adapted from C from &lt;https://github.com
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by The package maintainer.</p>
+  <p></p><p>Developed by Hayley Wolff.</p>
 </div>
 
 <div class="pkgdown">
