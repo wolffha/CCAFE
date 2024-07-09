@@ -9,6 +9,16 @@ The package contains two functions:
 2) CaseControl_SE
 
 ## Download the package
+
+To install this package using BioConductor:
+
+```R
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("CaseControlAF")
+```
+
 To download this package using *devtools* in R:
 
 ```R
@@ -17,25 +27,30 @@ devtools::install_github("https://github.com/wolffha/CaseControlAF")
 ```
 
 ## CaseControl_AF
+
 Use this function when you have the following statistics (for each variant)
+
 * Number of cases
 * Number of controls
 * Odds Ratio (OR) or beta coefficient
-* **AF** for the whole sample (cases and controls combined)
+* **AF** (allele frequency) for the total sample (cases and controls combined)
 
 ### Usage
+**data**: a dataframe with a row for each variant and columns for OR and total AF
+
 **N_case**: an integer for the number of case samples
 
 **N_control**: an integer for the number of control samples
 
-**OR**: a numeric vector with the OR (or exp(beta)) for each variant
+**OR_colname**: a string containing the exact column name in 'data' with the OR
 
-**AF_population**: a numeric vector with the AF for each variant
+**AF_total_colname**: a string containing the exact column name in 'data' with the total AF
 
 Returns a dataframe with two columns: AF_case and AF_control. The number of rows is equal to the number of variants.
 
 ## CaseControl_SE
 Use this function when you have the following statistics (for each variant)
+
 * Number of cases
 * Number of controls
 * Odds Ratio (OR) or beta coefficient
@@ -44,17 +59,19 @@ Use this function when you have the following statistics (for each variant)
 *Code adapted from ReACt GroupFreq function available here: (https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c)*
 
 ### Usage
+**data**: a dataframe with a row for each variant and columns for OR, SE, and optionally proxy MAFs
+
 **N_case**: an integer for the number of case samples
 
 **N_control**: an integer for the number of control samples
 
-**OR**: a numeric vector with the OR (or exp(beta)) for each variant
+**OR_colname**: a string containing the exact column name in 'data' with the OR
 
-**SE**: a numeric vector with the SE(log(OR)) for each variant
+**SE_colname**: a string containing the exact column name in 'data' with the SE
 
-**proxyMAFs**: *OPTIONAL* a numeric vector with the MAFs from a proxy for the whole sample (ex: gnomAD) for each variant
+**proxyMAFs_colname**:  a string containing the exact column name in 'data' with the proxy MAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA
 
-Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_pop containing the estimated minor allele frequency in the cases, controls, and whole sample. The number of rows is equal to the number of variants. If proxyMAFs is provided, three additional columns are included: MAF_case_adj, MAF_control_adj, and MAF_pop_adj with the adjusted MAF estimates using the proxyMAFs to model the estimated bias. 
+Returns a dataframe with three columns with names: MAF_case, MAF_control and MAF_total containing the estimated minor allele frequency in the cases, controls, and total sample. The number of rows is equal to the number of variants. If proxyMAFs_colname is not NA, will include three additional columns containing the adjusted estimated MAFs (MAF_case_adj, MAF_control_adj, MAF_total_adj)
 
 **NOTE:** This method assumes we are estimating the minor allele frequency (MAF)
 
