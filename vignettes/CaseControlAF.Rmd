@@ -7,8 +7,6 @@ vignette: >
   %\VignetteIndexEntry{CaseControlAF}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
----
----
 output: github_document
 ---
 
