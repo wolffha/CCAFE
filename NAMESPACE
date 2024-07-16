@@ -3,4 +3,4 @@
 export(CaseControl_AF)
 export(CaseControl_SE)
 import(dplyr)
-import(genpwr)
+
