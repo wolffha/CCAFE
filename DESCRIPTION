@@ -2,21 +2,26 @@ Package: CaseControlAF
 Type: Package
 Title: Case Control Allele Frequency Reconstruction 
 Version: 0.99.0
-Author: Hayley Wolff (Stoneman)
-Maintainer: Hayley Wolff <hayley.wolff@cuanschutz.edu>
+Authors@R: person("Hayley", "Wolff",
+  email = hayley.wolff@cuanschutz.edu,
+  role = c("cre", "aut"))
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
     The second function uses OR, NCase, NControl, and AF for the whole sample. 
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 7.3.1
+VignetteBuilder: knitr
+Encoding: UTF-8
 Imports: 
     genpwr,
     dplyr
 Depends: 
-    R (>= 2.10)
+    R (>= 4.4.0)
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://github.com/wolffha/CaseControlAF/
+BugReports: https://github.com/wolffha/CaseControlAF/issues
 biocViews: GenomeWideAssociation, ComparativeGenomics, Genetics, Preprocessing, SNP, Software, WholeGenome
