@@ -23,15 +23,33 @@ knitr::opts_chunk$set(
 
 *Motivation*
 
-Growth in the field of genetic and genomic research has vastly increased the amount of available data which is often made publicly available through summary statistics. While there are many opportunities and new methods to use summary-level genetic data, it is often limited by the statistics that are made available. Many post-hoc analyses of disease data require case and control allele frequencies (AFs), which are not always published.  We present a framework to derive the case and control AFs from Genome Wide Association Study (GWAS) summary statistics using the whole sample (case and control aggregated) AF, odds ratio, and case and control sample sizes, and compare it to a previously published method that uses the standard error (SE), odds ratio, and case and control sample sizes to recapitulate case and control AFs. 
+Growth in the field of genetic and genomic research has vastly increased the amount of available 
+data which is often made publicly available through summary statistics. While there are many 
+opportunities and new methods to use summary-level genetic data, it is often limited by the 
+statistics that are made available. Many post-hoc analyses of disease data require case and control 
+allele frequencies (AFs), which are not always published.  We present a framework to derive the case 
+and control AFs from Genome Wide Association Study (GWAS) summary statistics using the whole sample 
+(case and control aggregated) AF, odds ratio, and case and control sample sizes, and compare it to a 
+previously published method that uses the standard error (SE), odds ratio, and case and control 
+sample sizes to recapitulate case and control AFs. 
 
 *Results*
 
-In simulations and real data, we find estimating case and control AFs using the whole sample AF is highly accurate across all settings. When applying this method to the Pan-UK Biobank we find high concordance with the known AFs. Conversely, we find that in Pan-UK Biobank and simulations including covariates, deriving case and control AFs from the SE underestimates the minor AF (MAF) for higher MAFs. To enable estimation of case and control AFs using SE, we use gnomAD v3.1.2 AFs as a proxy for true AFs to estimate and correct for bias fit. While estimating the case control AF using the whole sample AF is preferred due to its high accuracy, estimating from the SE can be used more broadly since the SE can be calculated from the p-value and beta estimate, which are more commonly provided. Both methods expand the utility of publicly available genetic summary statistics, can be used when different statistics are reported, and promote the reusability of genomic data.  
+In simulations and real data, we find estimating case and control AFs using the whole sample AF is 
+highly accurate across all settings. When applying this method to the Pan-UK Biobank we find high 
+concordance with the known AFs. Conversely, we find that in Pan-UK Biobank and simulations including
+covariates, deriving case and control AFs from the SE underestimates the minor AF (MAF) for higher 
+MAFs. To enable estimation of case and control AFs using SE, we use gnomAD v3.1.2 AFs as a proxy for 
+true AFs to estimate and correct for bias fit. While estimating the case control AF using the whole 
+sample AF is preferred due to its high accuracy, estimating from the SE can be used more broadly 
+since the SE can be calculated from the p-value and beta estimate, which are more commonly provided. 
+Both methods expand the utility of publicly available genetic summary statistics, can be used when 
+different statistics are reported, and promote the reusability of genomic data.  
 
 
 <br><br>
-This document introduces you to the functions in CaseControlAF and gives small examples of how they can be used with summary statistics.
+This document introduces you to the functions in CaseControlAF and gives small examples of how they 
+can be used with summary statistics.
 
 <br><br>
 Find more details and documentation on GitHub: (https://wolffha.github.io/CaseControlAF/)
@@ -72,7 +90,8 @@ CaseControlAF contains two functions:
 * **CaseControl_AF()**
 * **CaseControl_SE()**
 
-The two functions are both used to reconstruct case and control allele frequencies (AFs) from genetic summary statistics. 
+The two functions are both used to reconstruct case and control allele frequencies (AFs) from genetic 
+summary statistics. 
 
 The user will select which function to use based on the available summary statistics.
 
@@ -90,7 +109,8 @@ The user will select which function to use based on the available summary statis
 * Odds Ratio (OR) or beta coefficient
 * **SE** of the log(OR) for each variant
 
-*Code adapted from ReACt GroupFreq function available here: (https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c)*
+*Code adapted from ReACt GroupFreq function available here: *
+*(https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c)*
 
 # CaseControl_AF {#CaseControl_AF}
 
@@ -121,7 +141,8 @@ CaseControl_SE has the following required inputs:
 * **OR**: a numeric vector with the OR (or exp(beta)) for each variant
 * **SE**: a numeric vector with the SE(log(OR)) for each variant
 
-In order to correct the bias in these estimates, the user has the option to provide proxy AFs for the true whole sample (population) minor AFs (MAFs). To do so, the following option parameter can be included:
+In order to correct the bias in these estimates, the user has the option to provide proxy AFs for the 
+true whole sample (population) minor AFs (MAFs). To do so, the following option parameter can be included:
 
 * **proxyMAFs**: a vector with MAFs for each variant from a proxy sample
 
@@ -148,7 +169,8 @@ These are the MAFs adjusted using the framework described here using the proxy M
 
 # Examples
 
-These examples use the provided sample data which is a subset of 500 variants from chromosome 1 of the Pan-UKBB diabetes GWAS in non-Finnish European individuals.
+These examples use the provided sample data which is a subset of 500 variants from chromosome 1 of 
+the Pan-UKBB diabetes GWAS in non-Finnish European individuals.
 
 ## A quick demo of CaseControl_AF() {#a-quick-demo-of-CaseControl_AF}
 
@@ -158,10 +180,11 @@ library(CaseControlAF)
 # load the data
 data("sampleDat")
 
-results_af <- CaseControl_AF(N_case = 16550,
+results_af <- CaseControl_AF(data = sampleDat,
+                             N_case = 16550,
                              N_control = 403923,
-                             OR = sampleDat$OR,
-                             AF_population = sampleDat$true_maf_pop)
+                             OR_colname = "OR",
+                             AF_total_colname = "true_maf_pop")
 
 head(results_af)
 ```
@@ -175,10 +198,11 @@ library(CaseControlAF)
 data("sampleDat")
 
 # First run without correction
-results_se_noCorr <- CaseControl_SE(N_case = 16550,
+results_se_noCorr <- CaseControl_SE(data = sampleDat,
+                                    N_case = 16550,
                                     N_control = 403923,
-                                    OR = sampleDat$OR,
-                                    SE = sampleDat$SE)
+                                    OR_colname = "OR",
+                                    SE_colname = "SE")
 head(results_se_noCorr)
 ```
 
@@ -189,11 +213,12 @@ library(CaseControlAF)
 data("sampleDat")
 
 # now run with correction
-results_se_corr <- CaseControl_SE(N_case = 16550,
+results_se_corr <- CaseControl_SE(data = sampleDat,
+                                  N_case = 16550,
                                   N_control = 403923,
-                                  OR = sampleDat$OR,
-                                  SE = sampleDat$SE,
-                                  proxyMAFs = sampleDat$gnomad_maf)
+                                  OR_colname = "OR",
+                                  SE_colname= "SE",
+                                  proxyMAFs_colname = "gnomad_maf")
 
 head(results_se_corr)
 ```
@@ -201,3 +226,4 @@ head(results_se_corr)
 ```{r}
 SessionInfo()
 ```
+
