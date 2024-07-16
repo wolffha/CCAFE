@@ -86,27 +86,27 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   }
 
   #calculate total sample size
-  N_total = N_control+N_case
+  N_total <- N_control+N_case
 
   #set a, b, c of quadratic equation derived in manuscript
-  a = (N_control/N_case)*(OR-1)
-  b = (OR-((N_total/N_case)*AF_total*OR))+((N_control/N_case)+(N_total*AF_total/N_case))
-  c = -(N_total/N_case)*AF_total
+  a <- (N_control/N_case)*(OR-1)
+  b <- (OR-((N_total/N_case)*AF_total*OR))+((N_control/N_case)+(N_total*AF_total/N_case))
+  c <- -(N_total/N_case)*AF_total
 
   AF_control <- rep(0, length(a)) # vector to store the control AFs
 
-  for(i in 1:length(a)) {
+  for(i in seq_len(length(a))) {
     #find roots of quadratic eq and choose root between 0 and 1 as AF_control
-    AF_control_opts =  quad_roots(a[i], b[i], c[i])
+    AF_control_opts <-  quad_roots(a[i], b[i], c[i])
     if(AF_control_opts[1]>1 | AF_control_opts[1]<0){
-      AF_control[i] = AF_control_opts[2]
+      AF_control[i] <- AF_control_opts[2]
     }else{
-      AF_control[i] = AF_control_opts[1]
+      AF_control[i] <- AF_control_opts[1]
     }
   }
 
   #calculate AF_case with known relationship shown in manuscript
-  AF_case = (N_total/N_case)*AF_total - (N_control/N_case)*AF_control
+  AF_case <- (N_total/N_case)*AF_total - (N_control/N_case)*AF_control
 
   #Output shows case AF first, then control AF
   return(data.frame(AF_case = AF_case,
