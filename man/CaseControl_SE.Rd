@@ -36,7 +36,7 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
 This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 }
 \examples{
-library(CaseControlAF)
+#library(CaseControlAF)
 
 data("sampleDat")
 sampleDat <- as.data.frame(sampleDat)
