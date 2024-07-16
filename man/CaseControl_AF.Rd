@@ -33,7 +33,7 @@ the user has access to the whole sample AF, the sample sizes, and the OR (or bet
 If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
 }
 \examples{
-library(CaseControlAF)
+#library(CaseControlAF)
 
 data("sampleDat")
 sampleDat <- as.data.frame(sampleDat)
