@@ -190,17 +190,17 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
       dat <- data.frame(estimated = estimated, true = true)
       adjusted <- rep(0, length(estimated))
 
-      for(i in 1:nrow(binDat)) {
+      for(i in seq_len(nrow(binDat))) {
         # filter data for model fitting to those within MAF bin
         subdat <- dplyr::filter(dat, true >= binDat[i,]$min &
                                   true < binDat[i,]$max)
-        mod <- stats::lm(data = subdat, formula = estimated ~ stats::poly(true, 2, raw = T))
+        mod <- stats::lm(data = subdat, formula = estimated ~ stats::poly(true, 2, raw = TRUE))
 
         # get studentized residuals use to filter outliers and refit model
         stud_res <- mod$residuals * stats::sd(mod$residuals)
         tokeep <- which(abs(stud_res) < 3)
 
-        mod2 <- stats::lm(data = subdat[tokeep,], formula = estimated ~ stats::poly(true,2, raw = T))
+        mod2 <- stats::lm(data = subdat[tokeep,], formula = estimated ~ stats::poly(true,2, raw = TRUE))
 
         # save refit model coefficients
         binDat[i,]$intercept <- mod2$coefficients[1]
