@@ -12,7 +12,6 @@ LazyData: false
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Imports: 
-    genpwr,
     dplyr
 Depends: 
     R (>= 4.4.0)
