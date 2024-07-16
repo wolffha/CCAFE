@@ -2,7 +2,7 @@ Package: CaseControlAF
 Type: Package
 Title: Case Control Allele Frequency Reconstruction 
 Version: 0.99.0
-Authors@R: c(person("Hayley", "Wolff", email = hayley.wolff@cuanschutz.edu, role = c("cre", "aut")))
+Authors@R: c(person("Hayley", "Wolff", email = "hayley.wolff@cuanschutz.edu", role = c("cre", "aut")))
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
     The second function uses OR, NCase, NControl, and AF for the whole sample. 
