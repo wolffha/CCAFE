@@ -90,75 +90,75 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   }
 
   # this function uses w, x, y, z as the derivation in the ReACt paper does - see their supplement
-  w = SE^2
-  x = 2*N_case
-  y = 2*N_control
-  z = OR
+  w <- SE^2
+  x <- 2*N_case
+  y <- 2*N_control
+  z <- OR
 
-  AC_control = rep(0, length(OR))
-  AC_case = rep(0, length(OR))
+  AC_control <- rep(0, length(OR))
+  AC_case <- rep(0, length(OR))
 
-  for(i in 1:length(OR)) {
+  for(i in seq_len(length(OR))) {
     # need to make sure the discriminate will be positive or it won't solve
   #inflate w(se) by 1.001, for at max 49 times (usually can be done within 5 iterations.
   #maximum inflation is 0.050195, ~5%), if disc still < 0 then give up
-    for(j in 0:99) {
-      w[i] = w[i] * (1.001^j)
-      disc = (((2*z[i]*y*(1-z[i])) - (w[i]*x*y*z[i]))^2) - 4*(w[i]*x*z[i] + (1-z[i])^2)*(y*z[i]*(x + y*z[i]))
+    for(j in seq(from = 0, to = 99, by = 1)) {
+      w[i] <- w[i] * (1.001^j)
+      disc <- (((2*z[i]*y*(1-z[i])) - (w[i]*x*y*z[i]))^2) - 4*(w[i]*x*z[i] + (1-z[i])^2)*(y*z[i]*(x + y*z[i]))
       if (!is.na(disc) & disc >= 0) {
         break
       }
     }
     if (is.na(disc) | disc < 0) { # if discriminate is <0 cannot solve and return 0s
-      AC_control[i] = 0
-      AC_case[i] = 0
+      AC_control[i] <- 0
+      AC_case[i] <- 0
     } else { # now actually solve the quadratic for allele counts (AC)
         # solve for the a, b, and c of the quadratic equation
         # this quadratic is solving for the allele count (AC) of the controls
         # overall their derivation relies on AC (rather than AF) and then calculates AF
-        a = (w[i]*x*z[i]) + (1-z[i])^2
-        b = 2*y*z[i]*(1-z[i]) - w[i]*x*y*z[i]
-        c = y*z[i]*(x + y*z[i])
+        a <- (w[i]*x*z[i]) + (1-z[i])^2
+        b <- 2*y*z[i]*(1-z[i]) - w[i]*x*y*z[i]
+        c <- y*z[i]*(x + y*z[i])
 
          #find roots of quadratic equation
-        AF_control_opts =  quad_roots(a, b, c)
+        AF_control_opts <- quad_roots(a, b, c)
         # in order to select which root, we need to use each option (d1 and d2) to calculate a, b, c of the 2x2 table of allele counts
-        d1 = AF_control_opts[1]
-        c1 = y - d1
-        b1 = (x*d1)/(y*z[i] - z[i]*d1 + d1)
-        a1 = x - b1
+        d1 <- AF_control_opts[1]
+        c1 <- y - d1
+        b1 <- (x*d1)/(y*z[i] - z[i]*d1 + d1)
+        a1 <- x - b1
 
-        d2 = AF_control_opts[2]
-        c2 = y - d2
-        b2 = (x*d2)/(y*z[i] - z[i]*d2 + d2)
-        a2 = x - b2
+        d2 <- AF_control_opts[2]
+        c2 <- y - d2
+        b2 <- (x*d2)/(y*z[i] - z[i]*d2 + d2)
+        a2 <- x - b2
 
-        vec1 = c(a1, b1, c1, d1) # vector of a,b,c,d using root 1
-        vec2 = c(a2, b2, c2, d2) # vector of a,b,c,d using root 2
+        vec1 <- c(a1, b1, c1, d1) # vector of a,b,c,d using root 1
+        vec2 <- c(a2, b2, c2, d2) # vector of a,b,c,d using root 2
 
         # if both roots allow for all values to be positive, choose the larger
         if(!any(vec1 < 0) & !(any(vec2 < 0))) {
           if(d1 > d2) { # if d1 is the larger root, then the AC_control = c1 and AC_case = a1
-            AC_control[i] = c1
-            AC_case[i] = a1
+            AC_control[i] <- c1
+            AC_case[i] <- a1
           } else {
-            AC_control[i] = c2
-            AC_case[i] = a2
+            AC_control[i] <- c2
+            AC_case[i] <- a2
           }
         } else if(!any(vec1 < 0)) { # if d1 allows all values of 2x2 to be positive but NOT d2, use c1 and a1
-          AC_control[i] = c1
-          AC_case[i] = a1
+          AC_control[i] <- c1
+          AC_case[i] <- a1
         } else { # if d2 allows all values to be positive but NOT d1, use c2 and a2
-          AC_control[i] = c2
-          AC_case[i] = a2
+          AC_control[i] <- c2
+          AC_case[i] <- a2
         }
       }
     }
 
   # calculate and return the MAF
-  MAF_case = AC_case/(2*N_case)
-  MAF_control = AC_control/(2*N_control)
-  MAF_pop = (MAF_case*N_case + MAF_control*N_control)/(N_case + N_control)
+  MAF_case <- AC_case/(2*N_case)
+  MAF_control <- AC_control/(2*N_control)
+  MAF_pop <- (MAF_case*N_case + MAF_control*N_control)/(N_case + N_control)
 
   # correct the MAFs using the proxy MAFs
   if(is.na(proxyMAFs_colname)){
@@ -209,23 +209,23 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
 
         # find indices of variants within this MAF bin
         keeps <- which(dat$true >= binDat[i,]$min & dat$true < binDat[i,]$max)
-        pred = dat$true*mod2$coefficients[2] + dat$true^2*mod2$coefficients[3] + mod2$coefficients[1]
-        bias = dat$true - pred
+        pred <- dat$true*mod2$coefficients[2] + dat$true^2*mod2$coefficients[3] + mod2$coefficients[1]
+        bias <- dat$true - pred
         # calculate and save adjusted MAF
         adjusted[keeps] <- bias[keeps]
       }
       return(adjusted)
     }
-    bias = get_adjusted(estimated = MAF_pop, true = proxyMAFs)
+    bias <- get_adjusted(estimated = MAF_pop, true = proxyMAFs)
 
-    MAF_case_adj = MAF_case + bias
-    MAF_control_adj = MAF_control + bias
-    MAF_pop_adj = MAF_pop + bias
+    MAF_case_adj <- MAF_case + bias
+    MAF_control_adj <- MAF_control + bias
+    MAF_pop_adj <- MAF_pop + bias
 
     # round any negatives to 0
-    MAF_case_adj[MAF_case_adj < 0] = 0
-    MAF_control_adj[MAF_control_adj < 0] = 0
-    MAF_pop_adj[MAF_pop_adj < 0] = 0
+    MAF_case_adj[MAF_case_adj < 0] <- 0
+    MAF_control_adj[MAF_control_adj < 0] <- 0
+    MAF_pop_adj[MAF_pop_adj < 0] <- 0
 
     return(data.frame(MAF_case = MAF_case,
                       MAF_control = MAF_control,
