@@ -10,11 +10,20 @@ CaseControl_SE(
   N_control = 0,
   OR_colname = "OR",
   SE_colname = "SE",
-  proxyMAFs_colname = NA
+  chromosome_colname = "chr",
+  sex_chromosomes = FALSE,
+  position_colname = "pos",
+  N_XX_case = NA,
+  N_XX_control = NA,
+  N_XY_case = NA,
+  N_XY_control = NA,
+  do_correction = F,
+  correction_data = NA,
+  remove_sex_chromosomes = TRUE
 )
 }
 \arguments{
-\item{data}{dataframe where each row is a variant and columns contain the OR, SE, and if applicable proxyMAFs}
+\item{data}{dataframe where each row is a variant and columns contain the OR, SE, chromosome and positions}
 
 \item{N_case}{an integer of the number of Case individuals}
 
@@ -24,18 +33,38 @@ CaseControl_SE(
 
 \item{SE_colname}{a string containing the exact column name in 'data' with the SE}
 
-\item{proxyMAFs_colname}{a string containing the exact column name in 'data' with the proxyMAFs to be used to correct the bias in the estimates. Default is NA - will only produce adjusted MAFs if not NA}
+\item{chromosome_colname}{a string containing the exact column name in 'data' with the chromosomes, default "chr"}
+
+\item{sex_chromosomes}{boolean, TRUE if variants from sex chromosomes are included in the dataset. Sex chromosomes can be numeric (23, 24) or character (X, Y). If numeric, assumes X=23 and Y=24.}
+
+\item{position_colname}{a string containing the exact column name in 'data' with the position, default "pos"}
+
+\item{N_XX_case}{the number of XX chromosome case individuals (REQUIRED if sex_chromosomes == TRUE)}
+
+\item{N_XX_control}{the number of XX chromosome control individuals (REQUIRED if sex_chromosomes == TRUE)}
+
+\item{N_XY_case}{the number of XY chromosome case individuals (REQUIRED if sex_chromosomes == TRUE)}
+
+\item{N_XY_control}{the number of XY chromosome control individuals (REQUIRED if sex_chromosomes == TRUE)}
+
+\item{do_correction}{boolean, TRUE if data is provided to perform correction}
+
+\item{correction_data}{a dataframe with the following exact columns: CHR, POS, proxy_MAF with data that is harmonized between the proxy true datasets and the observed dataset}
+
+\item{remove_sex_chromosomes}{boolean, TRUE if should keep autosomes only. This is needed when the number of biological sex males/females per case and control group is not known.}
 }
 \value{
-a dataframe with 3 columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If proxyMAFs is not NA, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
+returns data as a dataframe with two additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 }
 \description{
 This is a function to derive the case and control AFs from GWAS summary statistics when
 the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
-If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
+If user has SE instead of sample AF use [CaseControlAF::CaseControl_AF()]
 This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 }
 \examples{
+library(CaseControlAF)
+
 data("sampleDat")
 sampleDat <- as.data.frame(sampleDat)
 
