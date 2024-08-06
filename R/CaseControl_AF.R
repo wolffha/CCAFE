@@ -1,3 +1,4 @@
+
 #' @title CaseControl_AF
 #' @description
 #' This is a function to derive the case and control AFs from GWAS summary statistics when
@@ -108,8 +109,9 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   #calculate AF_case with known relationship shown in manuscript
   AF_case <- (N_total/N_case)*AF_total - (N_control/N_case)*AF_control
 
-  #Output shows case AF first, then control AF
-  return(data.frame(AF_case = AF_case,
-                    AF_control = AF_control))
-}
+  data$AF_case <- AF_case
+  data$AF_control <- AF_control
 
+  #Output shows case AF first, then control AF
+  return(data)
+}

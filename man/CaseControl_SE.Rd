@@ -17,7 +17,7 @@ CaseControl_SE(
   N_XX_control = NA,
   N_XY_case = NA,
   N_XY_control = NA,
-  do_correction = F,
+  do_correction = FALSE,
   correction_data = NA,
   remove_sex_chromosomes = TRUE
 )
