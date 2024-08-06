@@ -5,7 +5,7 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]"><!-- 
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -25,19 +25,28 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]"><!-- 
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
+  <a href="../articles/CaseControlAF.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/wolffha/CaseControlAF/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>CaseControl_AF</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/wolffha/CaseControlAF/blob/HEAD/R/CaseControl_AF.R" class="external-link"><code>R/CaseControl_AF.R</code></a></small>
     <div class="hidden name"><code>CaseControl_AF.Rd</code></div>
     </div>
 
@@ -59,31 +68,31 @@ If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>data</dt>
+
+
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>dataframe with each row being a variant and columns for AF_total and OR</p></dd>
 
 
-<dt>N_case</dt>
+<dt id="arg-n-case">N_case<a class="anchor" aria-label="anchor" href="#arg-n-case"></a></dt>
 <dd><p>the number of cases in the sample</p></dd>
 
 
-<dt>N_control</dt>
+<dt id="arg-n-control">N_control<a class="anchor" aria-label="anchor" href="#arg-n-control"></a></dt>
 <dd><p>the number of controls in the sample</p></dd>
 
 
-<dt>OR_colname</dt>
+<dt id="arg-or-colname">OR_colname<a class="anchor" aria-label="anchor" href="#arg-or-colname"></a></dt>
 <dd><p>a string containing the exact column name in 'data' with the OR</p></dd>
 
 
-<dt>AF_total_colname</dt>
+<dt id="arg-af-total-colname">AF_total_colname<a class="anchor" aria-label="anchor" href="#arg-af-total-colname"></a></dt>
 <dd><p>a string containing the exact column name in 'data' with the whole sample AF</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>returns a dataframe with two columns (AF_case, AF_control) and rows
+    <p>returns a dataframe with two columns (AF_case, AF_control) and rows
 equal to the number of variants</p>
     </div>
     <div id="references">
@@ -101,7 +110,7 @@ equal to the number of variants</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CaseControlAF</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/wolffha/CaseControlAF/" class="external-link">CaseControlAF</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sampleDat"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sampleDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">sampleDat</span><span class="op">)</span></span></span>
@@ -117,13 +126,20 @@ equal to the number of variants</p>
 <span class="r-in"><span>                                    AF_total_colname <span class="op">=</span> <span class="st">"true_maf_pop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">af_method_results</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        AF_case   AF_control</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2.041813e-01 2.041254e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 4.468049e-01 4.471490e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.647775e-01 1.641968e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.000000e+00 0.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.077692e-05 3.776488e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 1.381395e-02 1.402353e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    gnomad_maf        OR true_maf_pop      AF_case   AF_control</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2.04050e-01 1.0003442 2.041276e-01 2.041813e-01 2.041254e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 4.45508e-01 0.9986090 4.471354e-01 4.468049e-01 4.471490e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.82612e-01 1.0042339 1.642197e-01 1.647775e-01 1.641968e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 1.07925e-04 0.8996046 0.000000e+00 0.000000e+00 0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 8.82145e-05 0.2853611 3.670262e-05 1.077692e-05 3.776488e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 1.15995e-02 0.9848460 1.401528e-02 1.381395e-02 1.402353e-02</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -139,15 +155,15 @@ equal to the number of variants</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
