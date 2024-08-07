@@ -75,8 +75,10 @@ nControl_sample = 403923
 se_method_results <- CaseControl_SE(data = sampleDat,
                                     N_case = nCase_sample,
                                     N_control = nControl_sample,
-                                    OR = "OR",
-                                    SE = "SE")
+                                    OR_colname = "OR",
+                                    SE_colname = "SE",
+                                    chromosome_colname = "CHR",
+                                    position_colname = "POS")
 
 head(se_method_results)
 

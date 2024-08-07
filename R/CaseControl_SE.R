@@ -41,10 +41,10 @@
 #' se_method_results <- CaseControl_SE(data = sampleDat,
 #'                                     N_case = nCase_sample,
 #'                                     N_control = nControl_sample,
-#'                                     OR = "OR",
-#'                                     SE = "SE",
+#'                                     OR_colname = "OR",
+#'                                     SE_colname = "SE",
 #'                                     chromosome_colname = "CHR",
-#'                                     position_colname = "POS)
+#'                                     position_colname = "POS")
 #'
 #' head(se_method_results)
 #'
@@ -66,6 +66,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   if(N_case <= 0) {
     stop("ERROR: 'N_case' needs to be a number > 0")
   }
+
   if(N_control <= 0) {
     stop("ERROR: 'N_control' needs to be a number > 0")
   }
@@ -77,16 +78,19 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
 
   # check that OR and SE columns exist
   if(!OR_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'OR_colname': '", OR_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'OR_colname' does not exist in 'data'")
   }
+
   if(!SE_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'SE_colname': '", SE_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'SE_colname' does not exist in 'data'")
   }
+
   if(!chromosome_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'chromosome_colname: '", chromosome_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'chromosome_colname does not exist in 'data'")
   }
+
   if(!position_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'position_colname: '", position_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'position_colname does not exist in 'data'")
   }
 
   OR <- data[,OR_colname]
@@ -96,20 +100,22 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   if(typeof(OR) != "double") {
     stop("ERROR: 'OR' values must all be numbers (hint: check for NAs)")
   }
+
   if(typeof(SE) != "double") {
     stop("ERROR: 'SE' values must all be numbers (hint: check for NAs)")
   }
+
   if(any(SE < 0)) {
     stop("ERROR: 'SE' cannot contain negative values")
   }
 
-  sexchr_type = NA
+  sexchr_type <- NA
 
   # check sex chromosome info
   if(typeof(data[,c(chromosome_colname)]) == "character") { # if column is character
     # check if can be coerced to all numeric
     if(any(suppressWarnings(is.na(as.numeric(data[,c(chromosome_colname)]))))) {
-      sexchr_type = "chr"
+      sexchr_type <- "chr"
       # there were characters in chromosome column so make sure sex chromosomes is true
       if(!sex_chromosomes & !remove_sex_chromosomes) {
         stop("ERROR: Non-numeric chromosomes (sex chromosomes) present but 'sex_chromosomes' = FALSE")
@@ -118,7 +124,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
       # make sure there are none > 22 which could be numeric representations of sex chromosomes
       if(any(as.numeric(data[,c(chromosome_colname)]) > 22)) {
         if(!sex_chromosomes & !remove_sex_chromosomes) {
-          sexchr_type = "num"
+          sexchr_type <- "num"
           stop("ERROR: Chromosomes > 22 (sex chromosomes) present but 'sex_chromosomes' = FALSE")
         }
       }
@@ -126,7 +132,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   } else {
     # if chromosome column is all numeric check for those > 22 which are likely sex chromosomes
     if(any(data[,c(chromosome_colname)]) > 22) {
-      sexchr_type = "num"
+      sexchr_type <- "num"
       if(!sex_chromosomes) {
         stop("ERROR: Chromosomes > 22 (sex chromosomes) present but 'sex_chromosomes' = FALSE")
       }
@@ -144,12 +150,15 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
     if(!is.data.frame(correction_data)) {
       stop("ERROR: 'correction_data' must be a dataframe")
     }
+
     if(!"CHR" %in% colnames(correction_data)) {
       stop("ERROR: column name 'CHR' must be in 'correction_data'")
     }
+
     if(!"POS" %in% colnames(correction_data)) {
       stop("ERROR: column name 'POS' must be in 'correction_data'")
     }
+
     if(!"proxy_MAF" %in% colnames(correction_data)) {
       stop("ERROR: column name 'proxy_MAF' must be in 'correction_data'")
     }
@@ -409,7 +418,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
 
       breaks <- c(0, binDat$ymax, 1)
       dat$bin <- cut(dat$estimated, breaks = breaks, include.lowest = TRUE,
-                     right = FALSE, labels = F)
+                     right = FALSE, labels = FALSE)
       dat[dat$bin == 6, ]$bin <- 5
 
       dat$intercept <- 0

@@ -6,11 +6,10 @@ Authors@R: c(person("Hayley", "Wolff", email = "hayley.wolff@cuanschutz.edu", ro
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
     The second function uses OR, NCase, NControl, and AF for the whole sample. 
-License: GPL-3
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.3.1
-VignetteBuilder: knitr
+RoxygenNote: 7.3.2
 Imports: 
     dplyr
 Depends: 
@@ -19,7 +18,9 @@ Suggests:
     testthat (>= 3.0.0),
     rmarkdown,
     markdown,
-    knitr
+    knitr,
+    tidyverse
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/wolffha/CaseControlAF/
 BugReports: https://github.com/wolffha/CaseControlAF/issues

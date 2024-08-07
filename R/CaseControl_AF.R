@@ -47,6 +47,7 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   if(N_case <= 0) {
     stop("ERROR: 'N_case' needs to be a number > 0")
   }
+
   if(N_control <= 0) {
     stop("ERROR: 'N_control' needs to be a number > 0")
   }
@@ -58,10 +59,11 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
 
   # check that OR and AF_total columns exist
   if(!OR_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'OR_colname: '", OR_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'OR_colname' does not exist in 'data'")
   }
+
   if(!AF_total_colname %in% colnames(data)) {
-    stop(paste0("ERROR: 'AF_total_colname: '", AF_total_colname, "' does not exist in 'data'"))
+    stop("ERROR: 'AF_total_colname' does not exist in 'data'")
   }
 
   OR <- data[,c(OR_colname)]
@@ -71,12 +73,15 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   if(typeof(OR) != "double") {
     stop("ERROR: 'OR' values must all be numbers (hint: check for NAs)")
   }
+
   if(typeof(AF_total) != "double") {
     stop("ERROR: 'AF_total' values must all be numbers (hint: check for NAs)")
   }
+
   if(any(AF_total < 0)) {
     stop("ERROR: 'AF_total' cannot contain negative AFs")
   }
+
   if(any(AF_total > 1)) {
     stop("ERROR: 'AF_total' cannot contain values > 1")
   }

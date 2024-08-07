@@ -20,7 +20,7 @@ test_that("Number variants retained CaseControl_AF", {
 })
 
 test_that("Correct number of columns CaseControl_AF", {
-  expect_equal(ncol(res_AF), 2)
+  expect_equal(ncol(res_AF), (ncol(sampleDat) + 2))
 })
 
 test_that("Output correct cases CaseControl_AF", {

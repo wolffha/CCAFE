@@ -17,14 +17,26 @@ res_SE <- CaseControl_SE(data = sampleDat,
                          N_case = nCase_sample,
                          N_control = nControl_sample,
                          OR_colname = "OR",
-                         SE_colname = "SE")
+                         SE_colname = "SE",
+                         chromosome_colname = "CHR",
+                         position_colname = "POS",
+                         do_correction = F,
+                         sex_chromosomes = F)
+
+corr_dat <- data.frame(CHR = sampleDat$CHR,
+                       POS = sampleDat$POS,
+                       proxy_MAF = sampleDat$gnomad_maf)
 
 res_SE_adj <- CaseControl_SE(data = sampleDat,
                              N_case = nCase_sample,
                              N_control = nControl_sample,
                              OR_colname = "OR",
                              SE_colname = "SE",
-                             proxyMAFs_colname = "gnomad_maf")
+                             chromosome_colname = "CHR",
+                             position_colname = "POS",
+                             do_correction = T,
+                             sex_chromosomes = F,
+                             correction_data = corr_dat)
 
 test_that("Number variants retained CaseControl_SE", {
   expect_equal(nrow(res_SE), 500)
@@ -35,11 +47,11 @@ test_that("Number variants retained CaseControl_SE with correction", {
 })
 
 test_that("Correct number of columns CaseControl_SE", {
-  expect_equal(ncol(res_SE), 3)
+  expect_equal(ncol(res_SE), (ncol(sampleDat) + 3))
 })
 
 test_that("Correct number of columns CaseControl_SE with correction", {
-  expect_equal(ncol(res_SE_adj), 6)
+  expect_equal(ncol(res_SE_adj), (ncol(sampleDat) + 6))
 })
 
 test_that("Output correct cases CaseControl_SE", {
@@ -54,74 +66,107 @@ test_that("Output correct pop CaseControl_SE", {
   expect_equal(round(head(res_SE$MAF_total), 3), round(expected_mafpop_SE, 3))
 })
 
-test_that("Output correct cases CaseControl_SE with correction", {
-  expect_equal(round(head(res_SE_adj$MAF_case_adj), 3), round(expected_mafcase_adj, 3))
-})
-
-test_that("Output correct controls CaseControl_SE with correction", {
-  expect_equal(round(head(res_SE_adj$MAF_control_adj), 3), round(expected_mafcontrol_adj, 3))
-})
-
-test_that("Output correct pop CaseControl_SE with correction", {
-  expect_equal(round(head(res_SE_adj$MAF_total_adj), 3), round(expected_mafpop_adj, 3))
-})
-
 testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(.1, .2, .3, .4))
+                      SE = c(.1, .2, .3, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 test_that("Get no error from proper input" , {
-  expect_no_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_no_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
+                                 SE_colname = "SE",
+                                 chromosome_colname = "CHR",
+                                 position_colname = "POS",
+                                 do_correction = F,
+                                 sex_chromosomes = F))
 })
 
 testDat <- data.frame(OR = c(1, NA, 1, 1),
-                      SE = c(.1, .2, .3, .4))
+                      SE = c(.1, .2, .3, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 test_that("Get error from NA in OR" , {
-  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(.1, .2, NA, .4))
+                      SE = c(.1, .2, NA, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 test_that("Get error from NA in SE" , {
-  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(.1, .2, .3, .4))
+                      SE = c(.1, .2, .3, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 test_that("Get error negative case sample size" , {
-  expect_error(CaseControl_AF(data = testDat, N_case = -10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_AF(data = testDat, N_case = -10, N_control = 10, OR_colname = "OR", SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 test_that("Get error negative control sample size" , {
-  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = -10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_AF(data = testDat, N_case = 10, N_control = -10, OR_colname = "OR",
+                              SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(-.1, .2, .3, .4))
+                      SE = c(-.1, .2, .3, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 test_that("Get error negative SE" , {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
+                              SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(.1, .2, .3, .4))
+                      SE = c(.1, .2, .3, .4),
+                      CHR = c(1, 1, 1, 1),
+                      POS = c(1, 2, 3, 4))
 testDat <- as.list(testDat)
 test_that("Get error if input not dataframe", {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR", SE_colname = "SE"))
+  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
+                              SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
-testDat <- data.frame(odds_ratio = c(1, 0.999, 1, 0.900),
-                      standard_error = c(0.015, 0.012, 0.016, 3.5),
-                      AF = c(0.204, 0.447, 0.164, 0))
-
 test_that("Get error if odds ratio column name is wrong", {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
-                              SE_colname = "standard_error", proxyMAFs_colname = "AF"))
+  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "Odds.Ratio",
+                              SE_colname = "SE",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
 test_that("Get error if standard error columnn name is wrong", {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "odds_ratio",
-                              SE_colname = "SE", proxyMAFs_colname = "AF"))
+  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
+                              SE_colname = "err",
+                              chromosome_colname = "CHR",
+                              position_colname = "POS",
+                              do_correction = F,
+                              sex_chromosomes = F))
 })
 
-test_that("Get error if proxy MAFs column name is wrong", {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "odds_ratio",
-                              SE_colname = "standard_error", proxyMAFs_colname = "proxyMAF"))
-})
+

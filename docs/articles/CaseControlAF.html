@@ -101,8 +101,8 @@ href="https://wolffha.github.io/CaseControlAF/"
 class="uri">https://wolffha.github.io/CaseControlAF/</a>)</p>
 <p><br><br> To jump forward to individual function specifics:</p>
 <p><a href="#CaesControl_AF"><strong>CaseControl_AF</strong></a> – <a
-href="#a-quick-demo-of-CaseControl_AF">fast forward to example</a> <a
-href="#CaesControl_SE"><strong>CaseControl_SE</strong></a> – <a
+href="#a-quick-demo-of-CaseControl_AF">fast forward to example</a></p>
+<p><a href="#CaesControl_SE"><strong>CaseControl_SE</strong></a> – <a
 href="#a-quick-demo-of-CaseControl_SE">fast forward to example</a>
 <br><br><br></p>
 </div>
@@ -213,7 +213,7 @@ case and control sample is NOT known</li>
 </ul>
 <p>CaseControl_SE has the following optional inputs:</p>
 <p>If <em>sex_chromosomes</em> == TRUE and
-<em>remove_sex_chromosomes</em> == FALSE, then the following inputs are
+<em>remove_sex_chromosomes</em> == FALSE, the following inputs are
 required:</p>
 <ul>
 <li><strong>N_XX_case</strong>: the number of XX chromosome case
@@ -252,8 +252,8 @@ included in the dataframe:</p>
 <li>MAF_control_adj</li>
 <li>MAF_total_adj</li>
 </ul>
-<p>These are the MAFs adjusted using the framework described here using
-the proxy MAFs to model the expected bias.</p>
+<p>Containing MAFs adjusted using the the proxy MAFs to model the
+expected bias.</p>
 <p><em>NOTE:</em> This method assumes we are estimating the minor allele
 frequency (MAF). The minor allele may or may not be the effect variant
 used to calculate AF for the GWAS summary statistics. For additional
@@ -265,193 +265,193 @@ details see vignette titled “CaseControlAF Extra Details”</p>
 <p>These examples use the provided sample data which is a subset of 500
 variants from chromosome 1 of the Pan-UKBB diabetes GWAS in non-Finnish
 European individuals.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; ── [1mAttaching core tidyverse packages[22m ──────────────────────── tidyverse 2.0.0 ──</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mdplyr    [39m 1.1.4     [32m✔[39m [34mreadr    [39m 2.1.5</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mforcats  [39m 1.0.0     [32m✔[39m [34mstringr  [39m 1.5.1</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mggplot2  [39m 3.5.1     [32m✔[39m [34mtibble   [39m 3.2.1</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mlubridate[39m 1.9.3     [32m✔[39m [34mtidyr    [39m 1.3.1</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mpurrr    [39m 1.0.2     </span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; ── [1mConflicts[22m ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; [31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; [31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; [36mℹ[39m Use the conflicted package ([3m[34m&lt;http://conflicted.r-lib.org/&gt;[39m[23m) to force all conflicts to become errors</span></span></code></pre></div>
 <div id="a-quick-demo-of-CaseControl_AF" class="section level2">
 <h2>A quick demo of CaseControl_AF()</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># load the data</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>results_af <span class="ot">&lt;-</span> <span class="fu">CaseControl_AF</span>(<span class="at">data =</span> sampleDat,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                             <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                             <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                             <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                             <span class="at">AF_total_colname =</span> <span class="st">&quot;true_maf_pop&quot;</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">head</span>(results_af)</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop      AF_case   AF_control</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 2.041813e-01 2.041254e-01</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 4.468049e-01 4.471490e-01</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.647775e-01 1.641968e-01</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 0.000000e+00 0.000000e+00</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.077692e-05 3.776488e-05</span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.381395e-02 1.402353e-02</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; ── [1mAttaching core tidyverse packages[22m ──────────────────────── tidyverse 2.0.0 ──</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mdplyr    [39m 1.1.4     [32m✔[39m [34mreadr    [39m 2.1.5</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mforcats  [39m 1.0.0     [32m✔[39m [34mstringr  [39m 1.5.1</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mggplot2  [39m 3.5.1     [32m✔[39m [34mtibble   [39m 3.2.1</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mlubridate[39m 1.9.3     [32m✔[39m [34mtidyr    [39m 1.3.1</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [32m✔[39m [34mpurrr    [39m 1.0.2     </span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; ── [1mConflicts[22m ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; [31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; [31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; [36mℹ[39m Use the conflicted package ([3m[34m&lt;http://conflicted.r-lib.org/&gt;[39m[23m) to force all conflicts to become errors</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># plot the results</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># first need minor allele frequency to compare to true_maf_case</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>results_af<span class="sc">$</span>MAF_case <span class="ot">&lt;-</span> <span class="fu">sapply</span>(results_af<span class="sc">$</span>AF_case, <span class="cf">function</span>(x)</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="fu">ifelse</span>(x <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span><span class="sc">-</span>x, x))</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>results_af <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(results_af)</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="fu">ggplot</span>(results_af, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case)) <span class="sc">+</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_AF()&quot;</span>)</span></code></pre></div>
-<p><img src="C:/Users/HayBa/Documents/R%20Packages/CaseControlAF/vignettes/man/figures/unnamed-chunk-4-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># load the data</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>results_af <span class="ot">&lt;-</span> <span class="fu">CaseControl_AF</span>(<span class="at">data =</span> sampleDat,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                             <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>                             <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                             <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>                             <span class="at">AF_total_colname =</span> <span class="st">&quot;true_maf_pop&quot;</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">head</span>(results_af)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop      AF_case   AF_control</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 2.041813e-01 2.041254e-01</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 4.468049e-01 4.471490e-01</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.647775e-01 1.641968e-01</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 0.000000e+00 0.000000e+00</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.077692e-05 3.776488e-05</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.381395e-02 1.402353e-02</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># plot the results</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># first need minor allele frequency to compare to true_maf_case</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>results_af<span class="sc">$</span>MAF_case <span class="ot">&lt;-</span> <span class="fu">sapply</span>(results_af<span class="sc">$</span>AF_case, <span class="cf">function</span>(x)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">ifelse</span>(x <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span><span class="sc">-</span>x, x))</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>results_af <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(results_af)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">ggplot</span>(results_af, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_AF()&quot;</span>)</span></code></pre></div>
+<p><img src="C:/Users/HayBa/Documents/R%20Packages/CaseControlAF/vignettes/man/figures/unnamed-chunk-5-1.png" width="100%" /></p>
 </div>
 <div id="a-quick-demo-of-CaseControl_SE" class="section level2">
 <h2>A quick demo of CaseControl_SE()</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># load the data</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># First run without correction</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>results_se_noCorr <span class="ot">&lt;-</span> <span class="fu">CaseControl_SE</span>(<span class="at">data =</span> sampleDat,</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>                                    <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>                                    <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>                                    <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>                                    <span class="at">SE_colname =</span> <span class="st">&quot;SE&quot;</span>,</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>                                    <span class="at">chromosome_colname =</span> <span class="st">&quot;CHR&quot;</span>,</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>                                    <span class="at">position_colname =</span> <span class="st">&quot;POS&quot;</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>                                    <span class="at">do_correction =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>                                    <span class="at">sex_chromosomes =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="fu">head</span>(results_se_noCorr)</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop     MAF_case  MAF_control    MAF_total</span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 2.513875e-06 2.794421e-06 2.783379e-06</span></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.946826e-05 6.821993e-05 6.630105e-05</span></span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.250050e-02 1.269041e-02 1.268294e-02</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># plot the results</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">ggplot</span>(results_se_noCorr, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case)) <span class="sc">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_SE() No Correction&quot;</span>)</span></code></pre></div>
-<p><img src="C:/Users/HayBa/Documents/R%20Packages/CaseControlAF/vignettes/man/figures/unnamed-chunk-5-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># load the data</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>corr_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">CHR =</span> sampleDat<span class="sc">$</span>CHR,</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>                        <span class="at">POS =</span> sampleDat<span class="sc">$</span>POS,</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>                        <span class="at">proxy_MAF =</span> sampleDat<span class="sc">$</span>gnomad_maf)</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co"># now run with correction</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>results_se_corr <span class="ot">&lt;-</span> <span class="fu">CaseControl_SE</span>(<span class="at">data =</span> sampleDat,</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>                                  <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>                                  <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>                                  <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>                                  <span class="at">SE_colname =</span> <span class="st">&quot;SE&quot;</span>,</span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>                                  <span class="at">chromosome_colname =</span> <span class="st">&quot;CHR&quot;</span>,</span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>                                  <span class="at">position_colname =</span> <span class="st">&quot;POS&quot;</span>,</span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>                                  <span class="at">do_correction =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>                                  <span class="at">correction_data =</span> corr_data,</span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>                                  <span class="at">sex_chromosomes =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="fu">head</span>(results_se_corr)</span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
-<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
-<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop     MAF_case  MAF_control    MAF_total</span></span>
-<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
-<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
-<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
-<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 2.513875e-06 2.794421e-06 2.783379e-06</span></span>
-<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.946826e-05 6.821993e-05 6.630105e-05</span></span>
-<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.250050e-02 1.269041e-02 1.268294e-02</span></span>
-<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt;   MAF_case_adj MAF_control_adj MAF_total_adj</span></span>
-<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; 1 2.101173e-01    2.100673e-01  2.100692e-01</span></span>
-<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; 2 4.831277e-01    4.834338e-01  4.834218e-01</span></span>
-<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; 3 1.598885e-01    1.593830e-01  1.594029e-01</span></span>
-<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; 4 2.513875e-06    2.794421e-06  2.783379e-06</span></span>
-<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; 5 1.946826e-05    6.821993e-05  6.630105e-05</span></span>
-<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; 6 8.977955e-03    9.167862e-03  9.160387e-03</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># plot the results</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">ggplot</span>(results_se_corr, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case_adj)) <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_SE() With Correction&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># load the data</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># First run without correction</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>results_se_noCorr <span class="ot">&lt;-</span> <span class="fu">CaseControl_SE</span>(<span class="at">data =</span> sampleDat,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                                    <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                                    <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>                                    <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>                                    <span class="at">SE_colname =</span> <span class="st">&quot;SE&quot;</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>                                    <span class="at">chromosome_colname =</span> <span class="st">&quot;CHR&quot;</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>                                    <span class="at">position_colname =</span> <span class="st">&quot;POS&quot;</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>                                    <span class="at">do_correction =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>                                    <span class="at">sex_chromosomes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">head</span>(results_se_noCorr)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop     MAF_case  MAF_control    MAF_total</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 2.513875e-06 2.794421e-06 2.783379e-06</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.946826e-05 6.821993e-05 6.630105e-05</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.250050e-02 1.269041e-02 1.268294e-02</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># plot the results</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">ggplot</span>(results_se_noCorr, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case)) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_SE() No Correction&quot;</span>)</span></code></pre></div>
 <p><img src="C:/Users/HayBa/Documents/R%20Packages/CaseControlAF/vignettes/man/figures/unnamed-chunk-6-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; R version 4.4.1 (2024-06-14 ucrt)</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 22631)</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=English_United States.utf8 </span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; time zone: America/Denver</span></span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt;  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       </span></span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         </span></span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt;  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       </span></span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; [10] tidyverse_2.0.0      CaseControlAF_0.99.0</span></span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt;  [1] sass_0.4.9        utf8_1.2.4        generics_0.1.3    stringi_1.8.4    </span></span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;  [5] hms_1.1.3         digest_0.6.36     magrittr_2.0.3    timechange_0.3.0 </span></span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt;  [9] evaluate_0.24.0   grid_4.4.1        fastmap_1.2.0     jsonlite_1.8.8   </span></span>
-<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; [13] fansi_1.0.6       scales_1.3.0      textshaping_0.4.0 jquerylib_0.1.4  </span></span>
-<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; [17] cli_3.6.3         rlang_1.1.4       munsell_0.5.1     withr_3.0.1      </span></span>
-<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt; [21] cachem_1.1.0      yaml_2.3.10       tools_4.4.1       tzdb_0.4.0       </span></span>
-<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; [25] colorspace_2.1-1  vctrs_0.6.5       R6_2.5.1          lifecycle_1.0.4  </span></span>
-<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; [29] fs_1.6.4          htmlwidgets_1.6.4 ragg_1.3.2        pkgconfig_2.0.3  </span></span>
-<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; [33] desc_1.4.3        pkgdown_2.1.0     pillar_1.9.0      bslib_0.8.0      </span></span>
-<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; [37] gtable_0.3.5      glue_1.7.0        systemfonts_1.1.0 highr_0.11       </span></span>
-<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt; [41] xfun_0.45         tidyselect_1.2.1  rstudioapi_0.16.0 knitr_1.48       </span></span>
-<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; [45] farver_2.1.2      htmltools_0.5.8.1 labeling_0.4.3    rmarkdown_2.27   </span></span>
-<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; [49] compiler_4.4.1</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(CaseControlAF)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># load the data</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sampleDat&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>sampleDat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sampleDat)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>corr_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">CHR =</span> sampleDat<span class="sc">$</span>CHR,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                        <span class="at">POS =</span> sampleDat<span class="sc">$</span>POS,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>                        <span class="at">proxy_MAF =</span> sampleDat<span class="sc">$</span>gnomad_maf)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co"># now run with correction</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>results_se_corr <span class="ot">&lt;-</span> <span class="fu">CaseControl_SE</span>(<span class="at">data =</span> sampleDat,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>                                  <span class="at">N_case =</span> <span class="dv">16550</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>                                  <span class="at">N_control =</span> <span class="dv">403923</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>                                  <span class="at">OR_colname =</span> <span class="st">&quot;OR&quot;</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>                                  <span class="at">SE_colname =</span> <span class="st">&quot;SE&quot;</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>                                  <span class="at">chromosome_colname =</span> <span class="st">&quot;CHR&quot;</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>                                  <span class="at">position_colname =</span> <span class="st">&quot;POS&quot;</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>                                  <span class="at">do_correction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>                                  <span class="at">correction_data =</span> corr_data,</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>                                  <span class="at">sex_chromosomes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="fu">head</span>(results_se_corr)</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt;    CHR       POS REF ALT true_maf_case true_maf_control       beta      SE</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; 1 chr1 226824710   C   T     2.048e-01        2.041e-01  0.0003441 0.01471</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; 2 chr1 117812346   G   A     4.480e-01        4.471e-01 -0.0013920 0.01196</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; 3 chr1 230838863   C   T     1.647e-01        1.642e-01  0.0042250 0.01620</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt; 4 chr1  93121792 ATT   A     0.000e+00        0.000e+00 -0.1058000 3.53000</span></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt; 5 chr1 240236388   G   A     1.114e-05        3.775e-05 -1.2540000 1.25300</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; 6 chr1  12385196   G   A     1.390e-02        1.402e-02 -0.0152700 0.05046</span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;    gnomad_maf        OR true_maf_pop     MAF_case  MAF_control    MAF_total</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt; 1 2.04050e-01 1.0003442 2.041276e-01 1.764905e-01 1.764405e-01 1.764425e-01</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt; 2 4.45508e-01 0.9986090 4.471354e-01 3.263835e-01 3.266896e-01 3.266776e-01</span></span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="co">#&gt; 3 1.82612e-01 1.0042339 1.642197e-01 1.392353e-01 1.387297e-01 1.387496e-01</span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt; 4 1.07925e-04 0.8996046 0.000000e+00 2.513875e-06 2.794421e-06 2.783379e-06</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt; 5 8.82145e-05 0.2853611 3.670262e-05 1.946826e-05 6.821993e-05 6.630105e-05</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; 6 1.15995e-02 0.9848460 1.401528e-02 1.250050e-02 1.269041e-02 1.268294e-02</span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a><span class="co">#&gt;   MAF_case_adj MAF_control_adj MAF_total_adj</span></span>
+<span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a><span class="co">#&gt; 1 2.101173e-01    2.100673e-01  2.100692e-01</span></span>
+<span id="cb8-40"><a href="#cb8-40" tabindex="-1"></a><span class="co">#&gt; 2 4.831277e-01    4.834338e-01  4.834218e-01</span></span>
+<span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a><span class="co">#&gt; 3 1.598885e-01    1.593830e-01  1.594029e-01</span></span>
+<span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a><span class="co">#&gt; 4 2.513875e-06    2.794421e-06  2.783379e-06</span></span>
+<span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a><span class="co">#&gt; 5 1.946826e-05    6.821993e-05  6.630105e-05</span></span>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a><span class="co">#&gt; 6 8.977955e-03    9.167862e-03  9.160387e-03</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co"># plot the results</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">ggplot</span>(results_se_corr, <span class="fu">aes</span>(<span class="at">x =</span> true_maf_case, <span class="at">y =</span> MAF_case_adj)) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Example CaseControl_SE() With Correction&quot;</span>)</span></code></pre></div>
+<p><img src="C:/Users/HayBa/Documents/R%20Packages/CaseControlAF/vignettes/man/figures/unnamed-chunk-7-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; R version 4.4.1 (2024-06-14 ucrt)</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 22631)</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=English_United States.utf8 </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; time zone: America/Denver</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt;  [1] lubridate_1.9.3      forcats_1.0.0        stringr_1.5.1       </span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt;  [4] dplyr_1.1.4          purrr_1.0.2          readr_2.1.5         </span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt;  [7] tidyr_1.3.1          tibble_3.2.1         ggplot2_3.5.1       </span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; [10] tidyverse_2.0.0      CaseControlAF_0.99.0</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt;  [1] sass_0.4.9        utf8_1.2.4        generics_0.1.3    stringi_1.8.4    </span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt;  [5] hms_1.1.3         digest_0.6.36     magrittr_2.0.3    timechange_0.3.0 </span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt;  [9] evaluate_0.24.0   grid_4.4.1        fastmap_1.2.0     jsonlite_1.8.8   </span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt; [13] fansi_1.0.6       scales_1.3.0      textshaping_0.4.0 jquerylib_0.1.4  </span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt; [17] cli_3.6.3         rlang_1.1.4       munsell_0.5.1     withr_3.0.1      </span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt; [21] cachem_1.1.0      yaml_2.3.10       tools_4.4.1       tzdb_0.4.0       </span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; [25] colorspace_2.1-1  vctrs_0.6.5       R6_2.5.1          lifecycle_1.0.4  </span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt; [29] fs_1.6.4          htmlwidgets_1.6.4 ragg_1.3.2        pkgconfig_2.0.3  </span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt; [33] desc_1.4.3        pkgdown_2.1.0     pillar_1.9.0      bslib_0.8.0      </span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; [37] gtable_0.3.5      glue_1.7.0        systemfonts_1.1.0 highr_0.11       </span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt; [41] xfun_0.45         tidyselect_1.2.1  rstudioapi_0.16.0 knitr_1.48       </span></span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="co">#&gt; [45] farver_2.1.2      htmltools_0.5.8.1 labeling_0.4.3    rmarkdown_2.27   </span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="co">#&gt; [49] compiler_4.4.1</span></span></code></pre></div>
 </div>
 </div>
   </div>
