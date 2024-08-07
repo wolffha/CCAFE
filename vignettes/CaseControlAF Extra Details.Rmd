@@ -1,0 +1,387 @@
+---
+title: "CaseControlAF Extra Details"
+author: "Hayley Stoneman"
+date: "2024-07-03"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CaseControlAF Extra Details}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+# Introduction
+
+In this vignette we will share a few extra details regarding the usage of the functions in 
+CaseControlAF. 
+
+For the vignette with basic usage and examples see the CaseControlAF Vignette. 
+
+## Simulated dataset
+
+Will create a simulated dataset to explore the issues discussed in this vignette. 
+
+This dataset will have:
+
+* 2400 variants (100 on each chromosome)
+* 10000 cases and 10000 controls
+  * 5000 XX cases and 5000 XY cases
+  * 5000 XX controls and 5000 XY controls
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(CaseControlAF)
+library(DescTools)
+library(cowplot)
+```
+
+
+```{r Simulations}
+# need to create simulated AFs from autosomes and sex chromosomes
+
+# simulate 100 variants from each chromosome
+
+# will simulate from a sample of 5000 XX and 5000 XY case individuals
+# then add 5000 of each in control
+
+set.seed(2020)
+
+N_XX <- 5000
+N_XY <- 5000
+N <- N_XX + N_XY
+
+for(chr in 1:24) {
+  refs <- runif(n = 100, min = 0, max = 1)
+  if(chr < 23) {
+    genos <- t(sapply(refs, function(x) {
+      rmultinom(1, N, c(x^2, 2*x*(1-x), (1-x)^2))
+    }))
+    afs_toadd <- apply(genos, 1, function(x) ((x[1]*2)+x[2])/(2*N))
+  } else {
+    if(chr == 23) { # simulate X chromosome variants
+      XX_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XX*2, 1, x))
+      }))
+      XY_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XY, 1, x))
+      }))
+      
+      total_alleles <- XX_alleles + XY_alleles
+      afs_toadd <- total_alleles/(2*N_XX + N_XY)
+    } else { # simulate Y chromosome variants
+      XY_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XY, 1, x))
+      }))
+      
+      afs_toadd <- XY_alleles/(N_XY)
+    }
+  }
+  if(chr == 1) {
+    simDat <- data.frame(chr = chr, pos = c(1:100), case_sim_af = afs_toadd)
+  } else {
+    simDat <- rbind(simDat, data.frame(chr = chr, pos = c(1:100), case_sim_af = afs_toadd))
+  }
+}
+
+simDat$control_sim_af <- 0
+
+# simulate control AFs
+
+for(chr in 1:24) {
+  refs <- simDat[simDat$chr == chr,]$case_sim_af
+  refs <- refs - runif(n = length(refs), min = 0, max = .025)
+  refs[refs < 0] <- 0
+  refs[refs > 1] <- 1
+  
+  if(chr < 23) {
+    genos <- t(sapply(refs, function(x) {
+      rmultinom(1, N, c(x^2, 2*x*(1-x), (1-x)^2))
+    }))
+    afs_toadd <- apply(genos, 1, function(x) ((x[1]*2)+x[2])/(2*N))
+  } else {
+    if(chr == 23) { # simulate X chromosome variants
+      XX_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XX*2, 1, x))
+      }))
+      XY_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XY, 1, x))
+      }))
+      
+      total_alleles <- XX_alleles + XY_alleles
+      afs_toadd <- total_alleles/(2*N_XX + N_XY)
+    } else { # simulate Y chromosome variants
+      XY_alleles <- (sapply(refs, function(x) {
+        sum(rbinom(N_XY, 1, x))
+      }))
+      
+      afs_toadd <- XY_alleles/(N_XY)
+    }
+  }
+  simDat[simDat$chr == chr, ]$control_sim_af <- afs_toadd
+}
+
+simDat$total_sim_af <- (simDat$case_sim_af*10000 + simDat$control_sim_af*10000)/(10000 + 10000)
+
+# need to add OR and SE
+OR <- rep(0, nrow(simDat))
+SE <- rep(0, nrow(simDat))
+
+for(i in 1:nrow(simDat)) {
+  AF1 = simDat[i, ]$case_sim_af
+  AF2 = simDat[i,]$control_sim_af
+  if(simDat[i,]$chr < 23) {
+    # first calculate the 2x2 tables of allele counts
+    a = AF1 * 2 * 10000 
+    b = (1-AF1) * 2 * 10000
+    c = AF2 * 2 * 10000
+    d = (1-AF2) * 2 * 10000
+  } else {
+    if(simDat[i,]$chr == 23) {
+      a = AF1 * (2*5000 + 5000)
+      b = (1-AF1) * (2*5000 + 5000)
+      c = AF2 * (2*5000 + 5000)
+      d = (1-AF2) * (2*5000 + 5000)
+    } else {
+      a = AF1 * 5000
+      b = (1-AF1) * 5000
+      c = AF2 * 5000
+      d = (1-AF2) * 5000
+    }
+  }
+  
+  OR[i] <- (a*d)/(b*c)
+  SE[i] <- sqrt(1/a + 1/b + 1/c + 1/d)
+}
+
+simDat$OR <- OR
+simDat$SE <- SE
+
+simDat[simDat$chr == 23, ]$chr <- "X"
+simDat[simDat$chr == 24, ]$chr <- "Y"
+
+simDat <- simDat %>% rowwise() %>%
+  mutate(is_minor_case = ifelse(case_sim_af <= 0.5, 1, 0),
+         is_minor_control = ifelse(control_sim_af <= 0.5, 1, 0),
+         is_minor_total = ifelse(total_sim_af <= 0.5, 1, 0)) %>%
+  mutate(case_sim_maf = ifelse(is_minor_case, case_sim_af, 1-case_sim_af),
+         control_sim_maf = ifelse(is_minor_control, control_sim_af, 1-control_sim_af),
+         total_sim_maf = ifelse(is_minor_total, total_sim_af, 1-total_sim_af))
+
+head(simDat)
+```
+
+# MAF vs AF
+
+## Minor alleles in CaseControl_SE
+
+A key assumption made by the implementation of CaseControl_SE is that the frequency being estimated
+is that of the *minor* allele. As such, the returned value is always the minor allele and bounded
+[0,0.5], regardless of which allele was used for calculation of the input OR and SE. This can 
+create complications in data harmonization between multiple datasets, because the minor allele may
+not always be the same between the two datasets. We note that care should be taken when using this
+method to reconstruct case and control AFs for use in secondary analyses as the alleles being 
+compared may not be retained. 
+
+### Examples in simulated data
+
+```{r Any mismatched alleles}
+nrow(simDat[simDat$is_minor_case != simDat$is_minor_control, ])
+```
+There are 32 variants for which the minor allele is a different allele in cases and controls. 
+
+```{r Show mismatched alleles}
+diff_alleles <- simDat[simDat$is_minor_case != simDat$is_minor_control, ]
+diff_alleles
+```
+
+This will results in different alleles being reported from CaseControl_SE, which, if used for
+subsequent analyses like case case GWAS (CC-GWAS) would result in the user comparing different 
+alleles between datasets/groups. 
+
+## Using total minor allele frequency in CaseControl_AF
+
+In analyses for the manuscript we assessed using the total sample MAF compared to the total sample
+AF. Here we noted that converting the total AF to MAF first (and using that as input) introduces 
+variability due to rounding. 
+
+### Demonstration in simulations
+
+Here we will show the effects of converting to MAF in 3 scenarios:
+
+1. No AF conversions for calculations, No conversions for comparison
+2. No AF conversions for calculations, convert to MAF for comparison
+3. Convert to MAF for calculations, covert to MAF for comparison
+
+```{r Calculate AFs}
+simDat <- simDat[is.finite(simDat$OR), ]
+simDat <- as.data.frame(simDat)
+
+res_AF <- CaseControl_AF(data = simDat,
+                         N_case = 10000,
+                         N_control = 10000,
+                         OR_colname = "OR",
+                         AF_total_colname = "total_sim_af")
+
+res_MAF <- CaseControl_AF(data = simDat,
+                         N_case = 10000,
+                         N_control = 10000,
+                         OR_colname = "OR",
+                         AF_total_colname = "total_sim_maf")
+```
+
+```{r Plot AF results, message=FALSE}
+p_1 <- ggplot(res_AF, aes(x = case_sim_af, y = AF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True AF") +
+  ylab("Estimated AF") +
+  geom_text(x = .175, y = .9, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_af, res_AF$AF_case, na.rm = T)$rho.c$est, 4))) +
+  ggtitle("1. No Conversion")
+
+res_AF$MAF_case <- sapply(res_AF$AF_case, function(x) ifelse(x > 0.5, 1-x, x))
+res_AF <- as.data.frame(res_AF)
+p_2 <- ggplot(res_AF, aes(x = case_sim_maf, y = MAF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True MAF") +
+  ylab("Estimated MAF") +
+  geom_text(x = .1, y = .45, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_maf, res_AF$MAF_case, na.rm = T)$rho.c$est, 4))) +
+  ggtitle("2. Convert AFTER")
+
+p_3 <- ggplot(res_MAF, aes(x = case_sim_maf, y = AF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True MAF") +
+  ylab("Estimated MAF") +
+  geom_text(x = .1, y = .48, label = paste0("CCC=", round(DescTools::CCC(res_MAF$case_sim_maf, res_MAF$AF_case, na.rm = T)$rho.c$est, 4))) +
+  ggtitle("3. Convert BEFORE")
+
+cowplot::plot_grid(p_1, p_2, p_3, ncol = 3)
+```
+Here it's clear to see that as long as the user does not convert to MAF before estimating the
+case and control AFs, then we get perfect reconstruction of the AFs. Conversely, converting the 
+total sample AF to MAF first introduces variability around the estimates (seen in scenario 3). 
+Overall, the estimates are still highly accurate, but when possible we recommend not converting
+AFs to MAF before inputting to CaseControl_AF.
+
+# Variants on sex chromosomes
+
+Another potential problem that users may encounter is the presence of sex chromosomes when using
+CaseControl_SE. 
+
+The derivation for the framework underlying CaseControl_SE utilizes the total allele number (AN) 
+for cases and controls. The original proposed method in ReACt used the equation AN = 2*N, where N
+is the sample size. However, this is only true in all samples for autosomes. This equation will
+also hold true for the X chromosome in an all biological female (XX) sample. However, in any sample
+in which there are both XX and XY individuals, this equation will not give the correct total AN
+for the sex chromosomes. 
+
+We have added the ability to estimate the case and control MAF for the sex chromosomes by employing
+the following equations for the AN in the original framework:
+
+$$ AN_X = 2*N_{XX individuals} + N_{XY individuals} $$
+$$ AN_Y = N_{XY individuals} $$
+$$ AN_{autosomes} = 2*N$$
+Failing to use the correct AN resulted in MAF estimates that did not follow the same trend as the
+autosomes. We require chromosome data with the input for CaseControl_SE to check for the presence of
+variants on sex chromosomes. Notably, in order to estimate the MAFs for these sex chromosomes, users
+must know and provide as input the number of XX and XY individuals per case and control sample. 
+While it is reasonable to expect most studies to publish this demographic information, it may not
+always be available. In this case, users can set the flag *'remove_sex_chromosomes'* to TRUE and
+the method will return the MAFs for only autosomal variants. We will demonstrate below what the 
+results may look like if the sex chromosomes are not properly accounted for. 
+
+The implementation of CaseControl_AF directly uses sample size and total AF, rather than total AN. 
+Thus this method is not sensitive to the XX and XY specific samples sizes. We will also show this 
+below. 
+
+### Demonstration in simulations
+
+```{r ceate unaccounted for sex chr data}
+# to simulate a dataset in which the sex chromosomes are not properly accounted for, we will falsely
+# rename the x and y chromosomes to autosomes
+simDat_nosex <- simDat
+simDat_nosex[simDat_nosex$chr == "X", ]$chr <- 1
+simDat_nosex[simDat_nosex$chr == "Y", ]$chr <- 2
+```
+
+```{r Get estimated AF/MAF}
+af_res_sex <- CaseControl_AF(data = simDat,
+                           N_case = 10000,
+                           N_control = 10000,
+                           OR_colname = "OR",
+                           AF_total_colname = "total_sim_af")
+
+se_res <- CaseControl_SE(data = simDat_nosex,
+                                N_case = 10000,
+                                N_control = 10000,
+                                OR_colname = "OR",
+                                SE_colname = "SE",
+                                chromosome_colname = "chr",
+                                position_colname = "pos",
+                                sex_chromosomes = FALSE,
+                                do_correction = FALSE)
+
+se_res_sex <- CaseControl_SE(data = simDat,
+                             N_case = 10000,
+                             N_control = 10000,
+                             OR_colname = "OR",
+                             SE_colname = "SE",
+                             chromosome_colname = "chr",
+                             position_colname = "pos",
+                             sex_chromosomes = TRUE,
+                             remove_sex_chromosomes = FALSE,
+                             do_correction = FALSE,
+                             N_XX_case = 5000,
+                             N_XX_control = 5000,
+                             N_XY_case = 5000,
+                             N_XY_control = 5000)
+```
+
+Examine the following scenarios:
+
+1. CaseControl_AF with sex chromosomes
+2. CaseControl_SE with sex chromosomes improperly accounted for
+3. CaseControl_SE with sex chromosomes properly accounted for
+
+```{r plot sex chromosome results, message=FALSE}
+p_a <- ggplot(af_res_sex, aes(x = case_sim_af, y = AF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True AF") +
+  ylab("Estimated AF") +
+  ggtitle("1. CaseControl_AF")
+
+p_b <- ggplot(se_res, aes(x = case_sim_maf, y = MAF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True MAF") +
+  ylab("Estimated MAF") +
+  ggtitle("2. CaseControl_SE") 
+
+p_c <- ggplot(se_res_sex, aes(x = case_sim_maf, y = MAF_case)) +
+  geom_point() +
+  geom_abline(color = "red", linetype = "dashed") +
+  theme_bw() +
+  xlab("True MAF") +
+  ylab("Estimated MAF") +
+  ggtitle("3. CaseControl_SE") 
+
+plot_grid(p_a, p_b, p_c, ncol =3)
+```
+```{r}
+sessionInfo()
+```
+

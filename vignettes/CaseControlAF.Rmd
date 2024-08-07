@@ -13,7 +13,6 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/",
   out.width = "100%"
 )
 ```
@@ -56,9 +55,9 @@ Find more details and documentation on GitHub: (https://wolffha.github.io/CaseCo
 <br><br>
 To jump forward to individual function specifics:
 
-[**CaseControl_AF**](#CaesControl_AF) -- [fast forward to example](#a-quick-demo-of-CaseControl_AF)
+[**CaseControl_AF**](#CaseControl_AF) -- [fast forward to example](#a-quick-demo-of-CaseControl_AF)
 
-[**CaseControl_SE**](#CaesControl_SE) -- [fast forward to example](#a-quick-demo-of-CaseControl_SE)
+[**CaseControl_SE**](#CaseControl_SE) -- [fast forward to example](#a-quick-demo-of-CaseControl_SE)
 <br><br><br>
 
 
@@ -195,7 +194,7 @@ additional details see vignette titled "CaseControlAF Extra Details"
 These examples use the provided sample data which is a subset of 500 variants from chromosome 1 
 of the Pan-UKBB diabetes GWAS in non-Finnish European individuals.
 
-```{r}
+```{r, echo=FALSE,message=FALSE}
 library(CaseControlAF)
 library(tidyverse)
 ```
@@ -219,7 +218,7 @@ results_af <- CaseControl_AF(data = sampleDat,
 head(results_af)
 ```
 
-```{r}
+```{r, eval=TRUE}
 # plot the results
 # first need minor allele frequency to compare to true_maf_case
 results_af$MAF_case <- sapply(results_af$AF_case, function(x)
@@ -232,7 +231,6 @@ ggplot(results_af, aes(x = true_maf_case, y = MAF_case)) +
   theme_bw() +
   ggtitle("Example CaseControl_AF()")
 ```
-
 
 ## A quick demo of CaseControl_SE() {#a-quick-demo-of-CaseControl_SE}
 
@@ -256,12 +254,13 @@ results_se_noCorr <- CaseControl_SE(data = sampleDat,
 head(results_se_noCorr)
 ```
 
-```{r}
+```{r, eval=TRUE}
 # plot the results
 ggplot(results_se_noCorr, aes(x = true_maf_case, y = MAF_case)) +
   geom_point() +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
   theme_bw() +
+  coord_cartesian(ylim = c(0,.5)) +
   ggtitle("Example CaseControl_SE() No Correction")
 ```
 
@@ -291,7 +290,7 @@ results_se_corr <- CaseControl_SE(data = sampleDat,
 head(results_se_corr)
 ```
 
-```{r}
+```{r, eval=TRUE}
 library(tidyverse)
 # plot the results
 ggplot(results_se_corr, aes(x = true_maf_case, y = MAF_case_adj)) +
