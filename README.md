@@ -8,6 +8,8 @@ The package contains two functions:
 1) CaseControl_AF
 2) CaseControl_SE
 
+See full documentation, vignettes, and examples here: (https://wolffha.github.io/CaseControlAF/)
+
 ## Download the package
 
 To install this package using BioConductor:
@@ -100,7 +102,7 @@ Returns the *data* dataframe with three additional columns with names: MAF_case,
 
 **NOTE:** This method assumes we are estimating the minor allele frequency (MAF)
 
-### Examples
+### Examples and documentation
 
-See examples here: (https://wolffha.github.io/CaseControlAF/)
+See full documentation, vignettes, and examples here: (https://wolffha.github.io/CaseControlAF/)
 
