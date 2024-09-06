@@ -89,12 +89,13 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   # solve for real roots of a quadratic using the quadratic formula
   quad_roots<-function(a,b,c){
     c(((-b-sqrt(b^2-4*a*c))/(2*a)),((-b+sqrt(b^2-4*a*c))/(2*a)))
+    # You could add a return statement to this function and then return a vector of the roots
   }
 
-  #calculate total sample size
+  # calculate total sample size
   N_total <- N_control+N_case
 
-  #set a, b, c of quadratic equation derived in manuscript
+  # set a, b, c of quadratic equation derived in manuscript
   a <- (N_control/N_case)*(OR-1)
   b <- (OR-((N_total/N_case)*AF_total*OR))+((N_control/N_case)+(N_total*AF_total/N_case))
   c <- -(N_total/N_case)*AF_total
@@ -102,7 +103,7 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
   AF_control <- rep(0, length(a)) # vector to store the control AFs
 
   for(i in seq_len(length(a))) {
-    #find roots of quadratic eq and choose root between 0 and 1 as AF_control
+    # find roots of quadratic eq and choose root between 0 and 1 as AF_control
     AF_control_opts <-  quad_roots(a[i], b[i], c[i])
     if(AF_control_opts[1]>1 | AF_control_opts[1]<0){
       AF_control[i] <- AF_control_opts[2]
@@ -111,12 +112,12 @@ CaseControl_AF <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", A
     }
   }
 
-  #calculate AF_case with known relationship shown in manuscript
+  # calculate AF_case with known relationship shown in manuscript
   AF_case <- (N_total/N_case)*AF_total - (N_control/N_case)*AF_control
 
   data$AF_case <- AF_case
   data$AF_control <- AF_control
 
-  #Output shows case AF first, then control AF
+  # Output shows case AF first, then control AF
   return(data)
 }
