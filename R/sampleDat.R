@@ -1,6 +1,6 @@
 #' PanUKBB and gnomAD Diabetes Data
 #'
-#' This is a subset of 500 variants on chromosome 1 from the Pan-UKBB diabetes GWAS with the whole sample (pop), case, and control minor allele frequency (MAF) for those classified in Pan-UKBB as European (EUR). This variants (which are mapped to GRCh37) have been harmonized with gnomAD non-Finnish European (NFE) MAFs.
+#' This is a subset of 500 variants on chromosome 1 from the Pan-UKBB diabetes GWAS with the whole sample (pop), case, and control minor allele frequency (MAF) for those classified in Pan-UKBB as European (EUR). Thess variants (which are mapped to GRCh37) have been harmonized with gnomAD non-Finnish European (NFE) MAFs.
 #'
 #' @format ## `sampleDat`
 #' A data frame with 500 rows and 11 columns:
