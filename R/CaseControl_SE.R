@@ -1,11 +1,11 @@
 #' @title CaseControl_SE
-#' @description This is a function to derive the case and control AFs from GWAS summary statistics when
-#' the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
-#' If user has SE instead of sample AF use [CaseControlAF::CaseControl_AF()]
+#' @description This is a function to derive the case, control and total sample MAFs from GWAS summary statistics when
+#' the user has access to the SE for the log(OR) for each variant, the sample sizes, and the OR (or beta).
+#' If user has sample AF instead of SE use [CaseControlAF::CaseControl_AF()]
 #' This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 #'
 #' @param data dataframe where each row is a variant and columns contain the OR, SE, chromosome and positions
-#' @param N_case an integer of the number of Case individuals
+#' @param N_case an integer of the number of Case individuals # I would make the N_case and N_control definitions consistent between this and the CaseControl_AF.R descriptions
 #' @param N_control an integer of the number of Control individuals
 #' @param OR_colname a string containing the exact column name in 'data' with the OR
 #' @param SE_colname a string containing the exact column name in 'data' with the SE
@@ -20,7 +20,7 @@
 #' @param correction_data a dataframe with the following exact columns: CHR, POS, proxy_MAF with data that is harmonized between the proxy true datasets and the observed dataset
 #' @param remove_sex_chromosomes boolean, TRUE if should keep autosomes only. This is needed when the number of biological sex males/females per case and control group is not known.
 #'
-#' @return returns data as a dataframe with two additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
+#' @return returns data as a dataframe with three additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 #'
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
 #'
@@ -96,7 +96,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   OR <- data[,OR_colname]
   SE <- data[,SE_colname]
 
-  # check for valid input for OR and AF_total
+  # check for valid input for OR and SE
   if(typeof(OR) != "double") {
     stop("ERROR: 'OR' values must all be numbers (hint: check for NAs)")
   }
@@ -167,16 +167,17 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   # solve for real roots of a quadratic using the quadratic formula
   quad_roots<-function(a,b,c){
     c(((-b-sqrt(b^2-4*a*c))/(2*a)),((-b+sqrt(b^2-4*a*c))/(2*a)))
+    # You could add a return statement to this function and then return a vector of the roots
   }
 
-  solve_maf <- function(w, x, y, z, N_case, N_control) {
+  solve_maf <- function(w, x, y, z, N_case, N_control) { # may be helpful to explain what w, x, y, z are
     AC_control <- rep(0, length(OR))
     AC_case <- rep(0, length(OR))
 
     for(i in seq_len(length(OR))) {
       # need to make sure the discriminate will be positive or it won't solve
-      #inflate w(se) by 1.001, for at max 49 times (usually can be done within 5 iterations.
-      #maximum inflation is 0.050195, ~5%), if disc still < 0 then give up
+      # inflate w(se) by 1.001, for at max 49 times (usually can be done within 5 iterations.
+      # maximum inflation is 0.050195, ~5%), if disc still < 0 then give up
       for(j in seq(from = 0, to = 99, by = 1)) {
         w[i] <- w[i] * (1.001^j)
         disc <- (((2*z[i]*y*(1-z[i])) - (w[i]*x*y*z[i]))^2) - 4*(w[i]*x*z[i] + (1-z[i])^2)*(y*z[i]*(x + y*z[i]))
@@ -195,7 +196,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
         b <- 2*y*z[i]*(1-z[i]) - w[i]*x*y*z[i]
         c <- y*z[i]*(x + y*z[i])
 
-        #find roots of quadratic equation
+        # find roots of quadratic equation
         AF_control_opts <- suppressWarnings(quad_roots(a, b, c))
         # in order to select which root, we need to use each option (d1 and d2) to calculate a, b, c of the 2x2 table of allele counts
         d1 <- AF_control_opts[1]
@@ -353,12 +354,12 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
                              min = c(0, 0.1, 0.2, 0.3, 0.4),
                              max = c(0.1, 0.2, 0.3, 0.4, 0.5),
                              x = rep(0, 5),
-                             x2 = rep(0,5),
+                             x2 = rep(0, 5),
                              intercept = rep(0, 5),
                              ymin = rep(0, 5),
                              ymax = rep(0, 5))
       } else {
-        binDat <- data.frame(bins = c("[0.0, 0.05)", "[0.05, 0.1)", "[0.1, 0.15)","[0.15, 0.2)",
+        binDat <- data.frame(bins = c("[0.0, 0.05)", "[0.05, 0.1)", "[0.1, 0.15)", "[0.15, 0.2)",
                                       "[0.2, 0.25)", "[0.25, 0.3)", "[0.3, 0.35)", "[0.35, 0.4)",
                                       "[0.4, 0.45)", "[0.45, 0.5]"),
                              min = c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45),
@@ -430,7 +431,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
         dat[dat$bin == i, ]$x <- binDat[i,]$x
         dat[dat$bin == i, ]$x2 <- binDat[i, ]$x2
       }
-      # for each variant calculate the value of x for the regression (gnomAD value the corresponds to
+      # for each variant calculate the value of x for the regression (gnomAD value that corresponds to
       # that estimated value)
       get_x <- function(dat) {
         # we have only AF' which, in terms of fitting the regression = y'
@@ -461,7 +462,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
       bias <- dat$gnomad - dat$estimated
 
       # anything from 0 to 0.05 don't correct
-      #bias[which(estimated < 0.05)] <- 0
+      # bias[which(estimated < 0.05)] <- 0
       # if 0 output as gnomAD estimate don't correct
       bias[which(dat$gnomad == 0)] <- 0
 
