@@ -1,7 +1,7 @@
 #' @title CaseControl_SE
-#' @description This is a function to derive the case and control AFs from GWAS summary statistics when
-#' the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
-#' If user has SE instead of sample AF use [CaseControlAF::CaseControl_AF()]
+#' @description This is a function to derive the case, control, and total MAFs from GWAS summary statistics when
+#' the user has access to the sample sizes, and the OR (or beta), and SE for the log(OR) for each variant.
+#' If user has total AF instead of SE use [CaseControlAF::CaseControl_AF()]
 #' This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 #'
 #' @param data dataframe where each row is a variant and columns contain the OR, SE, chromosome and positions
@@ -20,7 +20,7 @@
 #' @param correction_data a dataframe with the following exact columns: CHR, POS, proxy_MAF with data that is harmonized between the proxy true datasets and the observed dataset
 #' @param remove_sex_chromosomes boolean, TRUE if should keep autosomes only. This is needed when the number of biological sex males/females per case and control group is not known.
 #'
-#' @return returns data as a dataframe with two additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
+#' @return returns data as a dataframe with three additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 #'
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
 #'
@@ -96,7 +96,7 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
   OR <- data[,OR_colname]
   SE <- data[,SE_colname]
 
-  # check for valid input for OR and AF_total
+  # check for valid input for OR and SE
   if(typeof(OR) != "double") {
     stop("ERROR: 'OR' values must all be numbers (hint: check for NAs)")
   }
@@ -169,13 +169,14 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
     c(((-b-sqrt(b^2-4*a*c))/(2*a)),((-b+sqrt(b^2-4*a*c))/(2*a)))
   }
 
+  # this function contains code to calculate the MAF using code adapted from ReACt. For explanations of w, x, y, z, see original ReACt paper (Supplement 5.2)
   solve_maf <- function(w, x, y, z, N_case, N_control) {
     AC_control <- rep(0, length(OR))
     AC_case <- rep(0, length(OR))
 
     for(i in seq_len(length(OR))) {
       # need to make sure the discriminate will be positive or it won't solve
-      #inflate w(se) by 1.001, for at max 49 times (usually can be done within 5 iterations.
+      # inflate w(se) by 1.001, for at max 49 times (usually can be done within 5 iterations.
       #maximum inflation is 0.050195, ~5%), if disc still < 0 then give up
       for(j in seq(from = 0, to = 99, by = 1)) {
         w[i] <- w[i] * (1.001^j)
@@ -383,7 +384,6 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR", S
         # get studentized residuals use to filter outliers and refit model
         stud_res <- mod$residuals * stats::sd(mod$residuals)
         tokeep <- which(abs(stud_res) < 3)
-        #print(paste0("# variants kept after residual filtering: ", length(tokeep)))
 
         if(length(tokeep) > 0) {
           mod2 <- stats::lm(data = subdat[tokeep,], formula = estimated ~ stats::poly(true,2, raw = TRUE))
