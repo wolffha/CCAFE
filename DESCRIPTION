@@ -19,7 +19,9 @@ Suggests:
     rmarkdown,
     markdown,
     knitr,
-    tidyverse
+    tidyverse,
+    DescTools,
+    cowplot
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/wolffha/CaseControlAF/
