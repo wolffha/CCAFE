@@ -3,7 +3,7 @@
 #' This is a subset of 500 variants on chromosome 1 from the Pan-UKBB diabetes GWAS with the whole sample (pop), case, and control minor allele frequency (MAF) for those classified in Pan-UKBB as European (EUR). 
 #' These variants (which are mapped to GRCh37) have been harmonized with gnomAD non-Finnish European (NFE) MAFs.
 #'
-#' @format ## `sampleDat`
+#' @format `sampleDat`
 #' A data frame with 500 rows and 11 columns:
 #' \describe{
 #'   \item{CHR}{chromosome number}
