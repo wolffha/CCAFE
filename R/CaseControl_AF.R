@@ -3,7 +3,7 @@
 #' @description
 #' This is a function to derive the case and control AFs from GWAS summary statistics when
 #' the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
-#' If user has SE instead of sample AF use [CaseControlAF::CaseControl_SE()]
+#' If user has SE instead of sample AF use [CCAFE::CaseControl_SE()]
 #'
 #' @param data dataframe with each row being a variant and columns for AF_total and OR
 #' @param N_case the number of cases in the sample
@@ -16,12 +16,12 @@
 #'
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
 #'
-#' @references https://github.com/wolffha/CaseControlAF
+#' @references https://github.com/wolffha/CCAFE
 #'
-#' @seealso \url{https://github.com/wolffha/CaseControlAF} for further documentation
+#' @seealso \url{https://github.com/wolffha/CCAFE} for further documentation
 #'
 #' @examples
-#' library(CaseControlAF)
+#' library(CCAFE)
 #'
 #' data("sampleDat")
 #' sampleDat <- as.data.frame(sampleDat)

@@ -1,7 +1,7 @@
 #' @title CaseControl_SE
 #' @description This is a function to derive the case, control, and total MAFs from GWAS summary statistics when
 #' the user has access to the sample sizes, and the OR (or beta), and SE for the log(OR) for each variant.
-#' If user has total AF instead of SE use [CaseControlAF::CaseControl_AF()]
+#' If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
 #' This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 #'
 #' @param data dataframe where each row is a variant and columns contain the OR, SE, chromosome and positions
@@ -24,12 +24,12 @@
 #'
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
 #'
-#' @references https://github.com/wolffha/CaseControlAF
+#' @references https://github.com/wolffha/CCAFE
 #'
-#' @seealso \url{https://github.com/wolffha/CaseControlAF} for further documentation
+#' @seealso \url{https://github.com/wolffha/CCAFE} for further documentation
 #'
 #' @examples
-#' library(CaseControlAF)
+#' library(CCAFE)
 #'
 #' data("sampleDat")
 #' sampleDat <- as.data.frame(sampleDat)

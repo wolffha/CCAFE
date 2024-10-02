@@ -54,16 +54,16 @@ CaseControl_SE(
 \item{remove_sex_chromosomes}{boolean, TRUE if should keep autosomes only. This is needed when the number of biological sex males/females per case and control group is not known.}
 }
 \value{
-returns data as a dataframe with two additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
+returns data as a dataframe with three additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 }
 \description{
-This is a function to derive the case and control AFs from GWAS summary statistics when
-the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
-If user has SE instead of sample AF use [CaseControlAF::CaseControl_AF()]
+This is a function to derive the case, control, and total MAFs from GWAS summary statistics when
+the user has access to the sample sizes, and the OR (or beta), and SE for the log(OR) for each variant.
+If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
 This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 }
 \examples{
-library(CaseControlAF)
+library(CCAFE)
 
 data("sampleDat")
 sampleDat <- as.data.frame(sampleDat)
@@ -84,10 +84,10 @@ head(se_method_results)
 
 }
 \references{
-https://github.com/wolffha/CaseControlAF
+https://github.com/wolffha/CCAFE
 }
 \seealso{
-\url{https://github.com/wolffha/CaseControlAF} for further documentation
+\url{https://github.com/wolffha/CCAFE} for further documentation
 }
 \author{
 Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}

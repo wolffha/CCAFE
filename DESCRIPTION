@@ -24,6 +24,6 @@ Suggests:
     cowplot
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-URL: https://github.com/wolffha/CaseControlAF/
-BugReports: https://github.com/wolffha/CaseControlAF/issues
+URL: https://github.com/wolffha/CCAFE/
+BugReports: https://github.com/wolffha/CCAFE/issues
 biocViews: GenomeWideAssociation, ComparativeGenomics, Genetics, Preprocessing, SNP, Software, WholeGenome
