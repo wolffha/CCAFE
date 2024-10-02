@@ -1,4 +1,4 @@
-# CaseControlAF
+# CCAFE
 Case Control Allele Frequency (AF) Reconstruction R Package
 
 This repository contains the source code for the CaseControlAF R package which can be used to reconstruct the allele frequency (AF) for cases and controls separately given commonly available summary statistics. 
@@ -8,24 +8,24 @@ The package contains two functions:
 1) CaseControl_AF
 2) CaseControl_SE
 
-See full documentation, vignettes, and examples here: (https://wolffha.github.io/CaseControlAF/)
+See full documentation, vignettes, and examples here: (https://wolffha.github.io/CCAFE/)
 
 ## Download the package
 
-To install this package using BioConductor:
+To install this package using BioConductor (Not yet available):
 
 ```R
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install("CaseControlAF")
+BiocManager::install("CCAFE")
 ```
 
 To download this package using *devtools* in R:
 
 ```R
 require(devtools)
-devtools::install_github("https://github.com/wolffha/CaseControlAF")
+devtools::install_github("https://github.com/wolffha/CCAFE/")
 ```
 
 ## CaseControl_AF
