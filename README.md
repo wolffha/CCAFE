@@ -1,5 +1,5 @@
 # CCAFE
-Case Control Allele Frequency (AF) Reconstruction R Package
+**C**ase **C**ontrol **A**llele **F**requency (AF) **E**stimation R Package
 
 This repository contains the source code for the CaseControlAF R package which can be used to reconstruct the allele frequency (AF) for cases and controls separately given commonly available summary statistics. 
 
