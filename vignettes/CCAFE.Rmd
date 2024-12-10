@@ -50,7 +50,7 @@ This document introduces you to the functions in CCAFE and gives small examples 
 can be used with summary statistics.
 
 <br><br>
-Find more details and documentation on GitHub: (https://wolffha.github.io/CCAFE/)
+Find more details and documentation on GitHub: (https://wolffha.github.io/CCAFE_documentation/)
 
 <br><br>
 To jump forward to individual function specifics:
@@ -199,8 +199,12 @@ library(CCAFE)
 library(tidyverse)
 ```
 
-
 ## A quick demo of CaseControl_AF() {#a-quick-demo-of-CaseControl_AF}
+
+Here is a quick demonstration of using the CaseControl_AF function in the CCAFE package using the sample data.
+This code block loads the library. It then loads the sample data and ensures that it is in the required format (dataframe). 
+It then runs the methods using the required parameters (data, N_case, N_control, OR_colname, AF_total_colname) and prints out
+the first few lines of the resulting returned dataframe. 
 
 ```{r CaseControl_AF example}
 library(CCAFE)
@@ -217,6 +221,7 @@ results_af <- CaseControl_AF(data = sampleDat,
 
 head(results_af)
 ```
+We can then plot the estimates from this example using the provided known AFs. 
 
 ```{r, eval=TRUE}
 # plot the results
@@ -233,6 +238,10 @@ ggplot(results_af, aes(x = true_maf_case, y = MAF_case)) +
 ```
 
 ## A quick demo of CaseControl_SE() {#a-quick-demo-of-CaseControl_SE}
+
+Here is a quick demonstration of using the CaseControl_SE function in the CCAFE package using the sample data.
+This code block loads the library. It then loads the sample data and ensures that it is in the required format (dataframe). 
+It then runs the methods using the required parameters (data, N_case, N_control, OR_colname, SE_colname, chromosome_colname, position_colname, do_correction, sex_chromosomes) and prints out the first few lines of the resulting returned dataframe. 
 
 ```{r CaseControl_SE example - no correction}
 library(CCAFE)
@@ -253,6 +262,7 @@ results_se_noCorr <- CaseControl_SE(data = sampleDat,
                                     sex_chromosomes = FALSE)
 head(results_se_noCorr)
 ```
+We can then plot the estimates from this example using the provided known AFs. 
 
 ```{r, eval=TRUE}
 # plot the results
@@ -263,6 +273,9 @@ ggplot(results_se_noCorr, aes(x = true_maf_case, y = MAF_case)) +
   coord_cartesian(ylim = c(0,.5)) +
   ggtitle("Example CaseControl_SE() No Correction")
 ```
+Here is a quick demonstration of using the CaseControl_SE function in the CCAFE package using the sample data, but also performing the provided bias correction.
+This code block loads the library. It then loads the sample data and ensures that it is in the required format (dataframe). 
+It then runs the methods using the required parameters (data, N_case, N_control, OR_colname, SE_colname, chromosome_colname, position_colname, do_correction, sex_chromosomes) and prints out the first few lines of the resulting returned dataframe. 
 
 ```{r CaseControl_SE example - correction}
 library(CCAFE)
@@ -289,6 +302,7 @@ results_se_corr <- CaseControl_SE(data = sampleDat,
 
 head(results_se_corr)
 ```
+Again, we can plot the estimates (corrected) and compare them to the provided known AFs and see reduced bias. 
 
 ```{r, eval=TRUE}
 library(tidyverse)
