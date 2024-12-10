@@ -313,6 +313,9 @@ ggplot(results_se_corr, aes(x = true_maf_case, y = MAF_case_adj)) +
   theme_bw() +
   ggtitle("Example CaseControl_SE() With Correction")
 ```
+# Integration with Bioconductor
+
+This software package aims to increase the utility of existing, publicly available genomic summary data from genome-wide association studies (GWAS). 
 
 ```{r}
 sessionInfo()
