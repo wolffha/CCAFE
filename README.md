@@ -8,7 +8,7 @@ The package contains two functions:
 1) CaseControl_AF
 2) CaseControl_SE
 
-See full documentation, vignettes, and examples here: (https://wolffha.github.io/CCAFE/)
+See full documentation, vignettes, and examples here: (https://wolffha.github.io/CCAFE_documentation/)
 
 ## Download the package
 
@@ -104,5 +104,5 @@ Returns the *data* dataframe with three additional columns with names: MAF_case,
 
 ### Examples and documentation
 
-See full documentation, vignettes, and examples here: (https://wolffha.github.io/CaseControlAF/)
+See full documentation, vignettes, and examples here: (https://wolffha.github.io/CCAFE_documentation/)
 
