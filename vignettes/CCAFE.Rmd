@@ -1,7 +1,8 @@
+
 ---
 title: "CCAFE Vignette"
 author: "Hayley Stoneman"
-date: "2024-07-03"
+date: "2024-12-17"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{CCAFE Vignette}
@@ -59,6 +60,11 @@ To jump forward to individual function specifics:
 
 [**CaseControl_SE**](#CaseControl_SE) -- [fast forward to example](#a-quick-demo-of-CaseControl_SE)
 <br><br><br>
+
+To view details on using GWAS VCF formatted data and Bioconductor packages to prepare your data for
+use in CCAFE:
+
+[Fast forward to demo](#gwasvcf)
 
 
 # Installation
@@ -313,9 +319,144 @@ ggplot(results_se_corr, aes(x = true_maf_case, y = MAF_case_adj)) +
   theme_bw() +
   ggtitle("Example CaseControl_SE() With Correction")
 ```
-# Integration with Bioconductor
+# Integration with Bioconductor {#gwasvcf}
 
-This software package aims to increase the utility of existing, publicly available genomic summary data from genome-wide association studies (GWAS). 
+### Tabular data
+
+This software package aims to increase the utility of existing, publicly available genomic summary 
+data from genome-wide association studies (GWAS). Summary statistics are still widely underutilized,
+despite their wide availability. As such, Bioconductor packages with methods specifically designed
+to analyze these statistics are still being developed. 
+
+The most commonly used repository of these summary statistics is the NHGRI GWAS Catalog (https://www.ebi.ac.uk/gwas/). From the GWAS catalog, a user can download full summary statistics 
+through the FTP sites. The majority of these summary statistics are zipped plain text (usually space
+or tab delimited) files. The GWAS Catalog itself has recommended a tabular, plain-text format as its
+recommended GWAS summary statistic format. As such, this tabular data is most simply read into R as 
+a dataframe structure. 
+
+### VCF data
+
+While the many users will download the GWAS files and load them into R, there are other ways to 
+obtain GWAS summary statistics, including through the IEU Open GWAS Project (https://gwas.mrcieu.ac.uk/). 
+The IEU Open GWAS Project instead uses the GWAS VCF format (https://doi.org/10.1101/2020.05.29.115824) 
+to store GWAS summary statistics and ensure alignment to the hg19 reference genome. We can use an
+assortment of Bioconductor packages and data structures to work with GWAS VCF data. 
+
+First we will use the *gwasvcf* package and Bioconductor package *VariantAnnotation*
+
+```{r, eval=FALSE}
+remotes::install_github("mrcieu/gwasvcf")
+BiocManager::install("VariantAnnotation")
+```
+```{r}
+suppressWarnings(suppressPackageStartupMessages({
+  library(gwasvcf)
+  library(VariantAnnotation)
+  library(tidyverse)
+}))
+```
+
+We will use the VCF from this GWAS of Type 2 Diabetes https://doi.org/10.1038/s41588-018-0084-1.
+I have stored the VCF and its index file on github to access using the VariantAnnotation 
+Bioconductor package in R. 
+
+```{r}
+vcf_url <- "https://raw.githubusercontent.com/wolffha/CCAFE_documentation/main/data/ebi-a-GCST007515.vcf.gz"
+tbi_url <- "https://raw.githubusercontent.com/wolffha/CCAFE_documentation/main/data/ebi-a-GCST007515.vcf.gz.tbi"
+vcf <- readVcf(TabixFile(vcf_url, index = tbi_url), "hg19")
+class(vcf)
+```
+
+We can  see the name of the GWAS dataset (refers to the IEU GWAS database ID name)
+
+```{r}
+samples(header(vcf))
+```
+
+We then want to convert this VCF formatted dataset into a simple dataframe to use with CCAFE.
+
+```{r}
+df_data <- vcf_to_tibble(vcf) %>% as.data.frame()
+head(df_data)
+```
+
+To understand what each of these columns is, we can look at the vcf format information
+
+```{r}
+vcf
+```
+
+The columns that we want for use in CCAFE are:
+
+* seqnames (chromosome)
+* start (position)
+* REF
+* ALT
+* ES (effect size of ALT)
+* SE
+* AF (allele frequency of ALT)
+* SS (total sample size)
+* NC (number of cases)
+* rsid
+
+```{r}
+# filter only selected columns
+df_filtered <- df_data %>% dplyr::select(seqnames, start, REF, ALT, ES, SE, AF, SS, NC, rsid)
+# rename chormosome and position column names to be more intuititve 
+colnames(df_filtered)[1:2] <- c("CHR", "POS")
+
+# keep only the rows with numeric (autosomal CHR)
+df_filtered$CHR <- as.character(df_filtered$CHR)
+df_filtered <- df_filtered[df_filtered$CHR %in% as.character(seq(1:22)), ]
+df_filtered$CHR <- as.numeric(df_filtered$CHR)
+
+head(df_filtered)
+```
+
+For CCAFE we will use OR, so let's create this column by exponentiating the effect estimate
+
+```{r}
+df_filtered$OR <- exp(df_filtered$ES)
+```
+
+Let's now apply the CCAFE methods to get case and control specific AFs
+
+First, since we have total AF, we'll use CaseControl_AF
+
+```{r}
+df_filtered <- CaseControl_AF(data = df_filtered,
+                              N_case = 48286,
+                              N_control = 250671,
+                              OR_colname = "OR",
+                              AF_total_colname = "AF")
+head(df_filtered)
+```
+
+We can look at a comparison of the AFs 
+
+Create a dataframe to plot
+
+```{r}
+plotdata_AF <- df_filtered %>% dplyr::select(AF, AF_case, AF_control)
+plotdata_AF$AF_total <- (plotdata_AF$AF_case*48286 + plotdata_AF$AF_control*250671)/(298857)
+colnames(plotdata_AF)[1] <- "AF(known)"
+plotdata_AF_long <- pivot_longer(plotdata_AF, cols = colnames(plotdata_AF))
+```
+
+Plot the results
+
+```{r}
+ggplot(plotdata_AF_long, aes(x = value, fill = name)) +
+  geom_boxplot(alpha = 0.5, outliers = F) +
+  facet_wrap(~name, nrow = 4) +
+  theme_bw()
+```
+
+These case and control AFs can now be used in further downstream analyses. For example, if the data
+was harmonized with a reference panel, then Summix2 (https://www.bioconductor.org/packages/release/bioc/html/Summix.html) could be used to estimate 
+substructure in the GWAS sample (total sample, cases, or controls). The AFs could also be used in 
+case-case GWAS (see https://wolffha.github.io/CCAFE_documentation/articles/CCAFE_CCGWAS.html) or 
+certain meta-analysis software (e.g. https://doi.org/10.1038/s41598-022-12185-6). 
 
 ```{r}
 sessionInfo()
