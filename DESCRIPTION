@@ -21,7 +21,9 @@ Suggests:
     knitr,
     tidyverse,
     DescTools,
-    cowplot
+    cowplot,
+    VariantAnnotation,
+    gwasvcf
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/wolffha/CCAFE/
