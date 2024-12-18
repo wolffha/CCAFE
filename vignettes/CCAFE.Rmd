@@ -348,6 +348,7 @@ First we will use the *gwasvcf* package and Bioconductor package *VariantAnnotat
 remotes::install_github("mrcieu/gwasvcf")
 BiocManager::install("VariantAnnotation")
 ```
+
 ```{r}
 suppressWarnings(suppressPackageStartupMessages({
   library(gwasvcf)
