@@ -1,3 +1,5 @@
+
+
 ---
 title: "CCAFE Vignette"
 author: "Hayley Stoneman"
@@ -422,12 +424,12 @@ Let's now apply the CCAFE methods to get case and control specific AFs
 First, since we have total AF, we'll use CaseControl_AF
 
 ```{r}
-df_filtered <- CaseControl_AF(data = df_filtered,
+df_data <- CaseControl_AF(data = df_data,
                               N_case = 48286,
                               N_control = 250671,
                               OR_colname = "OR",
                               AF_total_colname = "AF")
-head(df_filtered)
+head(df_data)
 ```
 
 We can look at a comparison of the AFs 
@@ -435,7 +437,7 @@ We can look at a comparison of the AFs
 Create a dataframe to plot
 
 ```{r}
-plotdata_AF <- df_filtered %>% dplyr::select(AF, AF_case, AF_control)
+plotdata_AF <- df_data %>% dplyr::select(AF, AF_case, AF_control)
 plotdata_AF$AF_total <- (plotdata_AF$AF_case*48286 + plotdata_AF$AF_control*250671)/(298857)
 colnames(plotdata_AF)[1] <- "AF(known)"
 plotdata_AF_long <- pivot_longer(plotdata_AF, cols = colnames(plotdata_AF))
