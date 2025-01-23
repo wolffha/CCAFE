@@ -32,7 +32,7 @@ NC A      Integer Number of cases used to estimate genetic effect
 ID 1      String  Study variant identifier
 }
 \usage{
-vcf_sample
+data("vcf_sample")
 }
 \description{
 A VCF from this GWAS of Type 2 Diabetes https://doi.org/10.1038/s41588-018-0084-1. containing
