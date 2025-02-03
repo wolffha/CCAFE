@@ -65,7 +65,7 @@ To jump forward to individual function specifics:
 To view details on using GWAS VCF formatted data and Bioconductor packages to prepare your data for
 use in CCAFE:
 
-[Fast forward to demo](#gwasvcf)
+[Fast forward to demo](#VCF)
 
 
 # Installation
@@ -320,7 +320,7 @@ ggplot(results_se_corr, aes(x = true_maf_case, y = MAF_case_adj)) +
   theme_bw() +
   ggtitle("Example CaseControl_SE() With Correction")
 ```
-# Integration with Bioconductor {#gwasvcf}
+# Integration with Bioconductor 
 
 ### Tabular data
 
@@ -335,7 +335,7 @@ or tab delimited) files. The GWAS Catalog itself has recommended a tabular, plai
 recommended GWAS summary statistic format. As such, this tabular data is most simply read into R as 
 a dataframe structure. 
 
-### VCF data
+### VCF data {#VCF}
 
 While the many users will download the GWAS files and load them into R, there are other ways to 
 obtain GWAS summary statistics, including through the IEU Open GWAS Project (https://gwas.mrcieu.ac.uk/). 
