@@ -243,7 +243,7 @@ p_1 <- ggplot(res_AF, aes(x = case_sim_af, y = AF_case)) +
   theme_bw() +
   xlab("True AF") +
   ylab("Estimated AF") +
-  geom_text(x = .175, y = .9, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_af, res_AF$AF_case, na.rm = T)$rho.c$est, 4))) +
+  geom_text(x = .175, y = .9, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_af, res_AF$AF_case, na.rm = TRUE)$rho.c$est, 4))) +
   ggtitle("1. No Conversion")
 
 res_AF$MAF_case <- sapply(res_AF$AF_case, function(x) ifelse(x > 0.5, 1-x, x))
@@ -254,7 +254,7 @@ p_2 <- ggplot(res_AF, aes(x = case_sim_maf, y = MAF_case)) +
   theme_bw() +
   xlab("True MAF") +
   ylab("Estimated MAF") +
-  geom_text(x = .1, y = .45, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_maf, res_AF$MAF_case, na.rm = T)$rho.c$est, 4))) +
+  geom_text(x = .1, y = .45, label = paste0("CCC=", round(DescTools::CCC(res_AF$case_sim_maf, res_AF$MAF_case, na.rm = TRUE)$rho.c$est, 4))) +
   ggtitle("2. Convert AFTER")
 
 p_3 <- ggplot(res_MAF, aes(x = case_sim_maf, y = AF_case)) +
@@ -263,7 +263,7 @@ p_3 <- ggplot(res_MAF, aes(x = case_sim_maf, y = AF_case)) +
   theme_bw() +
   xlab("True MAF") +
   ylab("Estimated MAF") +
-  geom_text(x = .1, y = .48, label = paste0("CCC=", round(DescTools::CCC(res_MAF$case_sim_maf, res_MAF$AF_case, na.rm = T)$rho.c$est, 4))) +
+  geom_text(x = .1, y = .48, label = paste0("CCC=", round(DescTools::CCC(res_MAF$case_sim_maf, res_MAF$AF_case, na.rm = TRUE)$rho.c$est, 4))) +
   ggtitle("3. Convert BEFORE")
 
 cowplot::plot_grid(p_1, p_2, p_3, ncol = 3)
