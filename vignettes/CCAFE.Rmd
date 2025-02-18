@@ -447,7 +447,7 @@ Plot the results
 
 ```{r}
 ggplot(plotdata_AF_long, aes(x = value, fill = name)) +
-  geom_boxplot(alpha = 0.5, outliers = F) +
+  geom_boxplot(alpha = 0.5, outliers = FALSE) +
   facet_wrap(~name, nrow = 4) +
   theme_bw()
 ```
