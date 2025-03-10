@@ -19,48 +19,72 @@ CaseControl_SE(
   N_XY_control = NA,
   do_correction = FALSE,
   correction_data = NA,
-  remove_sex_chromosomes = TRUE
+  remove_sex_chromosomes = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{data}{dataframe where each row is a variant and columns contain the OR, SE, chromosome and positions}
+\item{data}{dataframe where each row is a variant and columns contain the
+OR, SE, chromosome and positions}
 
 \item{N_case}{an integer of the number of Case individuals}
 
 \item{N_control}{an integer of the number of Control individuals}
 
-\item{OR_colname}{a string containing the exact column name in 'data' with the OR}
+\item{OR_colname}{a string containing the exact column name in 'data' with
+the OR}
 
-\item{SE_colname}{a string containing the exact column name in 'data' with the SE}
+\item{SE_colname}{a string containing the exact column name in 'data' with
+the SE}
 
-\item{chromosome_colname}{a string containing the exact column name in 'data' with the chromosomes, default "chr"}
+\item{chromosome_colname}{a string containing the exact column name in 'data'
+with the chromosomes, default "chr"}
 
-\item{sex_chromosomes}{boolean, TRUE if variants from sex chromosomes are included in the dataset. Sex chromosomes can be numeric (23, 24) or character (X, Y). If numeric, assumes X=23 and Y=24.}
+\item{sex_chromosomes}{boolean, TRUE if variants from sex chromosomes are
+included in the dataset. Sex chromosomes can be numeric (23, 24) or
+character (X, Y). If numeric, assumes X=23 and Y=24.}
 
-\item{position_colname}{a string containing the exact column name in 'data' with the position, default "pos"}
+\item{position_colname}{a string containing the exact column name in 'data'
+with the position, default "pos"}
 
-\item{N_XX_case}{the number of XX chromosome case individuals (REQUIRED if sex_chromosomes == TRUE)}
+\item{N_XX_case}{the number of XX chromosome case individuals
+(REQUIRED if sex_chromosomes == TRUE)}
 
-\item{N_XX_control}{the number of XX chromosome control individuals (REQUIRED if sex_chromosomes == TRUE)}
+\item{N_XX_control}{the number of XX chromosome control individuals
+(REQUIRED if sex_chromosomes == TRUE)}
 
-\item{N_XY_case}{the number of XY chromosome case individuals (REQUIRED if sex_chromosomes == TRUE)}
+\item{N_XY_case}{the number of XY chromosome case individuals
+(REQUIRED if sex_chromosomes == TRUE)}
 
-\item{N_XY_control}{the number of XY chromosome control individuals (REQUIRED if sex_chromosomes == TRUE)}
+\item{N_XY_control}{the number of XY chromosome control individuals
+(REQUIRED if sex_chromosomes == TRUE)}
 
 \item{do_correction}{boolean, TRUE if data is provided to perform correction}
 
-\item{correction_data}{a dataframe with the following exact columns: CHR, POS, proxy_MAF with data that is harmonized between the proxy true datasets and the observed dataset}
+\item{correction_data}{a dataframe with the following exact columns: CHR,
+POS, proxy_MAF with data that is harmonized between the proxy true datasets
+and the observed dataset}
 
-\item{remove_sex_chromosomes}{boolean, TRUE if should keep autosomes only. This is needed when the number of biological sex males/females per case and control group is not known.}
+\item{remove_sex_chromosomes}{boolean, TRUE if should keep autosomes only.
+This is needed when the number of biological sex males/females per case and
+control group is not known.}
+
+\item{verbose}{boolean, determine whether warnings should be displayed
+(default FALSE)}
 }
 \value{
-returns data as a dataframe with three additional columns: MAF_case, MAF_control, MAF_total for the estimated MAFs for each variant. If do_correction = TRUE, then will output 3 additional columns (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
+returns data as a dataframe with three additional columns: MAF_case,
+MAF_control, MAF_total for the estimated MAFs for each variant. If
+do_correction = TRUE, then will output 3 additional columns
+(MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
 }
 \description{
-This is a function to derive the case, control, and total MAFs from GWAS summary statistics when
-the user has access to the sample sizes, and the OR (or beta), and SE for the log(OR) for each variant.
+This is a function to derive the case, control, and total MAFs
+from GWAS summary statistics when the user has access to the sample sizes,
+and the OR (or beta), and SE for the log(OR) for each variant.
 If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
-This code uses the GroupFreq function adapted from C from <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
+This code uses the GroupFreq function adapted from C from
+<https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
 }
 \examples{
 library(CCAFE)

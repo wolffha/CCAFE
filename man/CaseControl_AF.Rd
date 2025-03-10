@@ -13,23 +13,27 @@ CaseControl_AF(
 )
 }
 \arguments{
-\item{data}{dataframe with each row being a variant and columns for AF_total and OR}
+\item{data}{dataframe with each row being a variant and columns for
+AF_total and OR}
 
 \item{N_case}{the number of cases in the sample}
 
 \item{N_control}{the number of controls in the sample}
 
-\item{OR_colname}{a string containing the exact column name in 'data' with the OR}
+\item{OR_colname}{a string containing the exact column name in 'data'
+with the OR}
 
-\item{AF_total_colname}{a string containing the exact column name in 'data' with the whole sample AF}
+\item{AF_total_colname}{a string containing the exact column name in 'data'
+with the whole sample AF}
 }
 \value{
 returns a dataframe with two columns (AF_case, AF_control) and rows
 equal to the number of variants
 }
 \description{
-This is a function to derive the case and control AFs from GWAS summary statistics when
-the user has access to the whole sample AF, the sample sizes, and the OR (or beta).
+This is a function to derive the case and control AFs from GWAS summary
+statistics when the user has access to the whole sample AF, the sample sizes,
+and the OR (or beta).
 If user has SE instead of sample AF use [CCAFE::CaseControl_SE()]
 }
 \examples{

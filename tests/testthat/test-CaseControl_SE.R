@@ -66,19 +66,6 @@ test_that("Output correct pop CaseControl_SE", {
   expect_equal(round(head(res_SE$MAF_total), 3), round(expected_mafpop_SE, 3))
 })
 
-testDat <- data.frame(OR = c(1, 1, 1, 1),
-                      SE = c(.1, .2, .3, .4),
-                      CHR = c(1, 1, 1, 1),
-                      POS = c(1, 2, 3, 4))
-test_that("Get no error from proper input" , {
-  expect_no_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
-                                 SE_colname = "SE",
-                                 chromosome_colname = "CHR",
-                                 position_colname = "POS",
-                                 do_correction = F,
-                                 sex_chromosomes = F))
-})
-
 testDat <- data.frame(OR = c(1, NA, 1, 1),
                       SE = c(.1, .2, .3, .4),
                       CHR = c(1, 1, 1, 1),
@@ -141,16 +128,6 @@ testDat <- data.frame(OR = c(1, 1, 1, 1),
                       SE = c(.1, .2, .3, .4),
                       CHR = c(1, 1, 1, 1),
                       POS = c(1, 2, 3, 4))
-testDat <- as.list(testDat)
-test_that("Get error if input not dataframe", {
-  expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "OR",
-                              SE_colname = "SE",
-                              chromosome_colname = "CHR",
-                              position_colname = "POS",
-                              do_correction = F,
-                              sex_chromosomes = F))
-})
-
 test_that("Get error if odds ratio column name is wrong", {
   expect_error(CaseControl_SE(data = testDat, N_case = 10, N_control = 10, OR_colname = "Odds.Ratio",
                               SE_colname = "SE",

@@ -1,8 +1,11 @@
 ---
 title: "CCAFE Extra Details"
 author: "Hayley Stoneman"
-date: "2024-07-03"
-output: rmarkdown::html_vignette
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{CCAFE Extra Details}
   %\VignetteEngine{knitr::rmarkdown}
@@ -35,7 +38,7 @@ This dataset will have:
   * 5000 XX cases and 5000 XY cases
   * 5000 XX controls and 5000 XY controls
 
-```{r, echo=FALSE, message=FALSE}
+```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(CCAFE)
 library(DescTools)
@@ -381,6 +384,8 @@ p_c <- ggplot(se_res_sex, aes(x = case_sim_maf, y = MAF_case)) +
 
 plot_grid(p_a, p_b, p_c, ncol =3)
 ```
+
+# Session Info
 ```{r}
 sessionInfo()
 ```
