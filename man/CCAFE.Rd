@@ -9,7 +9,6 @@ CCAFE: Case and Control Allele Frequency Estimation
 \section{Main functions}{
 
 - [CaseControl_AF()]
-
 - [CaseControl_SE()]
 }
 
