@@ -82,9 +82,9 @@ do_correction = TRUE, then will output 3 additional columns
 This is a function to derive the case, control, and total MAFs
 from GWAS summary statistics when the user has access to the sample sizes,
 and the OR (or beta), and SE for the log(OR) for each variant.
-If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
+If user has total AF instead of SE use \code{\link[=CaseControl_AF]{CaseControl_AF()}}
 This code uses the GroupFreq function adapted from C from
-<https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
+\url{https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c}
 }
 \examples{
 library(CCAFE)

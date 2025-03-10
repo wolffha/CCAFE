@@ -34,7 +34,7 @@ equal to the number of variants
 This is a function to derive the case and control AFs from GWAS summary
 statistics when the user has access to the whole sample AF, the sample sizes,
 and the OR (or beta).
-If user has SE instead of sample AF use [CCAFE::CaseControl_SE()]
+If user has SE instead of sample AF use \code{\link[=CaseControl_SE]{CaseControl_SE()}}
 }
 \examples{
 library(CCAFE)

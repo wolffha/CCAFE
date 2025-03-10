@@ -8,12 +8,16 @@ CCAFE: Case and Control Allele Frequency Estimation
 }
 \section{Main functions}{
 
-- [CaseControl_AF()]
-- [CaseControl_SE()]
+\itemize{
+\item \code{\link[=CaseControl_AF]{CaseControl_AF()}}
+\item \code{\link[=CaseControl_SE]{CaseControl_SE()}}
+}
 }
 
 \section{Utility functions}{
 
-- [CCAFE_convertVCF()]
+\itemize{
+\item \code{\link[=CCAFE_convertVCF]{CCAFE_convertVCF()}}
+}
 }
 
