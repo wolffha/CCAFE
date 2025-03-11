@@ -1,7 +1,7 @@
 Package: CCAFE
 Type: Package
 Title: Case Control Allele Frequency Estimation
-Version: 0.99.4
+Version: 0.99.5
 Authors@R: c(person("Hayley", "Wolff", email = "hayley.wolff@cuanschutz.edu", role = c("cre", "aut")))
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
