@@ -1,3 +1,21 @@
+CHANGES IN VERSION 0.99.4
+
+Updates per the review for bioconductor:
+
+* Remove LICENSE file - not needed as standard GPL-3 license is already in DESCRIPTION
+* Use importFrom in NAMESPACE instead of import
+* New package-level manual page
+* refactored code (vectorized where possible, all functions defined separately, added verbose argument)
+* Added utility function to convert VCF to dataframe for use in CCAFE methods
+* BiocCheck note: removed redundant stop/warn in signal conditions
+* BiocCheck note: shortened some functions
+* BiocCheck note: lines not longer than 80 characters
+* BiocCheck note: indents 4 spaces (not tab)
+* Using BiocStyle and TOC in CCAFE.rmd
+* No more redunant library calls in vignettes
+* fixed format of Integration with Bioconductor header
+* Added section name for Session Information to vignettes
+
 CHANGES IN VERSION 0.99.0
 
 First devel version of the package. Contains 2 functions:
