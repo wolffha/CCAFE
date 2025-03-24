@@ -1,7 +1,7 @@
 Package: CCAFE
 Type: Package
 Title: Case Control Allele Frequency Estimation
-Version: 0.99.5
+Version: 0.99.6
 Authors@R: c(person("Hayley", "Wolff", email = "hayley.wolff@cuanschutz.edu", role = c("cre", "aut")))
 Description: Functions to reconstruct case and control AFs from summary statistics. 
     One function uses OR, NCase, NControl, and SE(log(OR)). 
@@ -12,7 +12,8 @@ LazyData: false
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Imports: 
-    dplyr
+    dplyr,
+    VariantAnnotation
 Depends: 
     R (>= 4.4.0)
 Suggests: 
@@ -24,7 +25,6 @@ Suggests:
     DescTools,
     cowplot,
     BiocStyle,
-    VariantAnnotation,
     GenomicRanges,
     SummarizedExperiment,
     S4Vectors,
