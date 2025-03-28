@@ -1,3 +1,7 @@
+CHANGES IN VERSION 0.99.7
+
+* Delete intermediate files in vignettes directory
+
 CHANGES IN VERSION 0.99.6
 
 Updates per the review for bioconductor:
