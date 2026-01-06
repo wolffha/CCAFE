@@ -1,11 +1,7 @@
-#' @title CaseControl_SE
-#' @description This is a function to derive the case, control, and total MAFs
-#' from GWAS summary statistics when the user has access to the sample sizes,
-#' and the OR (or beta), and SE for the log(OR) for each variant.
-#' If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
+#' # @title CaseControl_SE# @description This is a function to derive the case, control, and total MAFs# from GWAS summary statistics when the user has access to the sample sizes,# and the OR (or beta), and SE for the log(OR) for each variant.If user has total AF instead of SE use [CCAFE::CaseControl_AF()]
 #' This code uses the GroupFreq function adapted from C from
 #' <https://github.com/Paschou-Lab/ReAct/blob/main/GrpPRS_src/CountConstruct.c>
-#'
+#' 
 #' @param data dataframe where each row is a variant and columns contain the
 #' OR, SE, chromosome and positions
 #' @param N_case an integer of the number of Case individuals
@@ -38,41 +34,46 @@
 #' control group is not known.
 #' @param verbose boolean, determine whether warnings should be displayed
 #' (default FALSE)
-#'
+#' 
 #' @return returns data as a dataframe with three additional columns: MAF_case,
 #' MAF_control, MAF_total for the estimated MAFs for each variant. If
 #' do_correction = TRUE, then will output 3 additional columns
 #' (MAF_case_adj, MAF_control_adj, MAF_total_adj) with the adjusted estimates.
-#'
+#' 
 #' @author Hayley Wolff (Stoneman), \email{hayley.wolff@cuanschutz.edu}
-#'
+#' 
 #' @references https://github.com/wolffha/CCAFE
-#'
+#' 
 #' @seealso \url{https://github.com/wolffha/CCAFE} for further documentation
-#'
+#' 
 #' @examples
+
 #' library(CCAFE)
+# data("sampleDat")
+# sampleDat <- as.data.frame(sampleDat)
+# 
+# nCase_sample = 16550
+# nControl_sample = 403923
+# sampleDat$N_case <- sample(1000:2000, nrow(sampleDat), replace = TRUE)
+# sampleDat$N_control <- sample(1000:2000, nrow(sampleDat), replace = TRUE)
+# # get the estimated case and control MAFs
+# se_method_results <- CaseControl_SE(data = sampleDat,
+#                                     N_case = nCase_sample,
+#                                     N_control = nControl_sample,
+#                                     OR_colname = "OR",
+#                                     SE_colname = "SE",
+#                                     chromosome_colname = "CHR",
+#                                     position_colname = "POS",
+#                                     N_variant_colname = TRUE,
+#                                     N_case_colname = "N_case",
+#                                     N_control_colname = "N_control")
+# 
+# head(se_method_results)
 #'
-#' data("sampleDat")
-#' sampleDat <- as.data.frame(sampleDat)
-#'
-#' nCase_sample = 16550
-#' nControl_sample = 403923
-#'
-#' # get the estimated case and control MAFs
-#' se_method_results <- CaseControl_SE(data = sampleDat,
-#'                                     N_case = nCase_sample,
-#'                                     N_control = nControl_sample,
-#'                                     OR_colname = "OR",
-#'                                     SE_colname = "SE",
-#'                                     chromosome_colname = "CHR",
-#'                                     position_colname = "POS")
-#'
-#' head(se_method_results)
-#'
-#' @importFrom dplyr left_join filter
 #' @export
-CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR",
+#'
+#'
+CaseControl_SE <- function(data, N_case, N_control, OR_colname = "OR",
                            SE_colname = "SE",
                            chromosome_colname = "chr", sex_chromosomes = FALSE,
                            position_colname = "pos",
@@ -83,19 +84,62 @@ CaseControl_SE <- function(data, N_case = 0, N_control = 0, OR_colname = "OR",
                            do_correction = FALSE,
                            correction_data = NA,
                            remove_sex_chromosomes = TRUE,
-                           verbose = FALSE) {
+                           verbose = FALSE,
+                           N_variant_colname = FALSE,
+                           N_case_colname = NULL,
+                           N_control_colname = NULL) {
+  
   # do input checking
-
   data <- as.data.frame(data)
-
-  # check valid input for case/control sample size
-  if(N_case <= 0) {
-    stop("'N_case' needs to be a number > 0")
+  
+  n_var <- nrow(data)
+  
+  if (N_variant_colname) {
+    
+    if (is.null(N_case_colname) || is.null(N_control_colname)) {
+      stop("When setting the variant column name value to TRUE, 'N_case_colname' and 'N_control_colname' must be provided")
+    }
+    
+    if (!N_case_colname %in% colnames(data)) {
+      stop(paste0("'", N_case_colname, "' not found in data"))
+    }
+    
+    if (!N_control_colname %in% colnames(data)) {
+      stop(paste0("'", N_control_colname, "' not found in data"))
+    }
+    
+    N_case <- data[[N_case_colname]]
+    N_control <- data[[N_control_colname]]
   }
 
-  if(N_control <= 0) {
-    stop("'N_control' needs to be a number > 0")
+  # N_case
+  if(!is.numeric(N_case)) {
+    stop("'N_case' must be numeric")
   }
+  if(length(N_case) == 1) {
+    N_case <- rep(N_case, n_var)
+  }
+  if(length(N_case) != n_var) {
+    stop("'N_case' must be length 1 or nrow(data)")
+  }
+  if(any(N_case <= 0, na.rm = TRUE)) {
+    stop("'N_case' must contain values > 0")
+  }
+  
+  # N_control
+  if(!is.numeric(N_control)) {
+    stop("'N_control' must be numeric")
+  }
+  if(length(N_control) == 1) {
+    N_control <- rep(N_control, n_var)
+  }
+  if(length(N_control) != n_var) {
+    stop("'N_control' must be length 1 or nrow(data)")
+  }
+  if(any(N_control <= 0, na.rm = TRUE)) {
+    stop("'N_control' must contain values > 0")
+  }
+  
 
   # check valid input data type
   if(!is.data.frame(data)) {
@@ -316,8 +360,10 @@ solve_maf <- function(w, x, y, z, N_case, N_control) {
     #maximum inflation is 0.050195, ~5%), if disc still < 0 then give up
     for(j in seq(from = 0, to = 99, by = 1)) {
       w[i] <- w[i] * (1.001^j)
-      disc <- (((2*z[i]*y*(1-z[i])) - (w[i]*x*y*z[i]))^2) - 4*(w[i]*x*z[i] +
-                                                                 (1-z[i])^2)*(y*z[i]*(x + y*z[i]))
+      disc <- (((2*z[i]*y[i]*(1 - z[i])) - (w[i]*x[i]*y[i]*z[i]))^2) -
+        4 * (w[i]*x[i]*z[i] + (1 - z[i])^2) *
+        (y[i]*z[i] * (x[i] + y[i]*z[i]))
+      
       if (!is.na(disc) & disc >= 0) {
         break
       }
@@ -329,23 +375,23 @@ solve_maf <- function(w, x, y, z, N_case, N_control) {
       # solve for the a, b, and c of the quadratic equation
       # this quadratic is solving for the allele count (AC) of the controls
       # overall their derivation relies on AC (not AF) and then calculates AF
-      a <- (w[i]*x*z[i]) + (1-z[i])^2
-      b <- 2*y*z[i]*(1-z[i]) - w[i]*x*y*z[i]
-      c <- y*z[i]*(x + y*z[i])
+      a <- (w[i] * x[i] * z[i]) + (1 - z[i])^2
+      b <- 2 * y[i] * z[i] * (1 - z[i]) - w[i] * x[i] * y[i] * z[i]
+      c <- y[i] * z[i] * (x[i] + y[i] * z[i])
 
       #find roots of quadratic equation
       AF_control_opts <- suppressWarnings(quad_roots(a, b, c))
       # in order to select which root, we need to use each option (d1 and d2)
       # to calculate a, b, c of the 2x2 table of allele counts
       d1 <- AF_control_opts[1]
-      c1 <- y - d1
-      b1 <- (x*d1)/(y*z[i] - z[i]*d1 + d1)
-      a1 <- x - b1
+      c1 <- y[i] - d1
+      b1 <- (x[i] * d1) / (y[i]*z[i] - z[i]*d1 + d1)
+      a1 <- x[i] - b1
 
       d2 <- AF_control_opts[2]
-      c2 <- y - d2
-      b2 <- (x*d2)/(y*z[i] - z[i]*d2 + d2)
-      a2 <- x - b2
+      c2 <- y[i] - d2
+      b2 <- (x[i] * d2) / (y[i]*z[i] - z[i]*d2 + d2)
+      a2 <- x[i] - b2
 
       vec1 <- c(a1, b1, c1, d1) # vector of a,b,c,d using root 1
       vec2 <- c(a2, b2, c2, d2) # vector of a,b,c,d using root 2
